@@ -1,4 +1,5 @@
 import { useTranslation } from 'react-i18next'
+import { Link } from 'react-router-dom'
 
 const Footer = () => {
   const { t } = useTranslation()
@@ -17,15 +18,15 @@ const Footer = () => {
           <div>
             <h4 className="font-bold mb-4">Links</h4>
             <ul className="space-y-2 text-gray-400">
-              <li><a href="#" className="hover:text-white">{t('footer.about')}</a></li>
+              <li><Link to="/about" className="hover:text-white">{t('footer.about')}</Link></li>
               <li><a href="#" className="hover:text-white">{t('footer.contact')}</a></li>
             </ul>
           </div>
           <div>
             <h4 className="font-bold mb-4">Legal</h4>
             <ul className="space-y-2 text-gray-400">
-              <li><a href="#" className="hover:text-white">{t('footer.privacy')}</a></li>
-              <li><a href="#" className="hover:text-white">{t('footer.terms')}</a></li>
+              <li><Link to="/privacy" className="hover:text-white">{t('footer.privacy')}</Link></li>
+              <li><Link to="/terms" className="hover:text-white">{t('footer.terms')}</Link></li>
             </ul>
           </div>
           <div>

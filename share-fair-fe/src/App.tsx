@@ -11,6 +11,9 @@ import SearchPage from './pages/SearchPage'
 import ListingDetailPage from './pages/ListingDetailPage'
 import ProfilePage from './pages/ProfilePage'
 import CreateListingPage from './pages/CreateListingPage'
+import PrivacyPolicyPage from './pages/PrivacyPolicyPage'
+import TermsOfServicePage from './pages/TermsOfServicePage'
+import AboutPage from './pages/AboutPage'
 
 // Components - Will be created in next iteration
 import Layout from './components/Layout'
@@ -35,6 +38,9 @@ function App() {
           <Route path="/auth/callback" element={<LoginPage />} />
           <Route path="/search" element={<SearchPage />} />
           <Route path="/listing/:id" element={<ListingDetailPage />} />
+          <Route path="/privacy" element={<PrivacyPolicyPage />} />
+          <Route path="/terms" element={<TermsOfServicePage />} />
+          <Route path="/about" element={<AboutPage />} />
 
           {/* Protected Routes */}
           <Route
