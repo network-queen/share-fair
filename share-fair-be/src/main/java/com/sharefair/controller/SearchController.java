@@ -1,0 +1,123 @@
+package com.sharefair.controller;
+
+import com.sharefair.dto.ApiResponse;
+import com.sharefair.dto.ListingDto;
+import com.sharefair.entity.Listing;
+import com.sharefair.repository.ListingRepository;
+import com.sharefair.repository.NeighborhoodRepository;
+import com.sharefair.service.SearchService;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
+@RestController
+@RequestMapping("/api/v1/search")
+@CrossOrigin(origins = "*")
+public class SearchController {
+    private final ListingRepository listingRepository;
+    private final NeighborhoodRepository neighborhoodRepository;
+    private final SearchService searchService;
+
+    public SearchController(ListingRepository listingRepository,
+                            NeighborhoodRepository neighborhoodRepository,
+                            SearchService searchService) {
+        this.listingRepository = listingRepository;
+        this.neighborhoodRepository = neighborhoodRepository;
+        this.searchService = searchService;
+    }
+
+    @GetMapping
+    public ResponseEntity<ApiResponse<Map<String, Object>>> search(
+            @RequestParam(required = false) String query,
+            @RequestParam(required = false) String neighborhood,
+            @RequestParam(required = false) String category,
+            @RequestParam(required = false) Integer radius,
+            @RequestParam(defaultValue = "relevance") String sortBy,
+            @RequestParam(defaultValue = "20") int limit,
+            @RequestParam(defaultValue = "0") int offset) {
+
+        limit = Math.max(1, Math.min(limit, 100));
+        offset = Math.max(0, offset);
+
+        List<Listing> listings = searchService.semanticSearch(
+                query, neighborhood, category, limit, offset);
+
+        List<ListingDto> dtos = listings.stream()
+                .map(this::toDto)
+                .collect(Collectors.toList());
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("listings", dtos);
+        response.put("total", dtos.size());
+        response.put("hasMore", dtos.size() == limit);
+
+        return ResponseEntity.ok(ApiResponse.success(response));
+    }
+
+    @PostMapping("/backfill-embeddings")
+    public ResponseEntity<ApiResponse<Map<String, Object>>> backfillEmbeddings(
+            @RequestParam(defaultValue = "100") int batchSize) {
+        batchSize = Math.max(1, Math.min(batchSize, 1000));
+        int processed = searchService.backfillEmbeddings(batchSize);
+        Map<String, Object> result = new HashMap<>();
+        result.put("processed", processed);
+        return ResponseEntity.ok(ApiResponse.success(result));
+    }
+
+    @GetMapping("/location")
+    public ResponseEntity<ApiResponse<List<ListingDto>>> searchByLocation(
+            @RequestParam double latitude,
+            @RequestParam double longitude,
+            @RequestParam(defaultValue = "5") int radius) {
+        // TODO: Search by geolocation using PostGIS - for now return all available listings
+
+        List<ListingDto> dtos = listingRepository.findAvailable()
+                .stream()
+                .map(this::toDto)
+                .collect(Collectors.toList());
+
+        return ResponseEntity.ok(ApiResponse.success(dtos));
+    }
+
+    @GetMapping("/neighborhoods")
+    public ResponseEntity<ApiResponse<List<Map<String, String>>>> getNeighborhoods() {
+        List<Map<String, String>> neighborhoods = neighborhoodRepository.findAll();
+        return ResponseEntity.ok(ApiResponse.success(neighborhoods));
+    }
+
+    @GetMapping("/categories")
+    public ResponseEntity<ApiResponse<List<String>>> getCategories() {
+        List<String> categories = neighborhoodRepository.findDistinctCategoriesInListings();
+        return ResponseEntity.ok(ApiResponse.success(categories));
+    }
+
+    @GetMapping("/autocomplete")
+    public ResponseEntity<ApiResponse<List<String>>> autocomplete(@RequestParam String query) {
+        List<String> suggestions = neighborhoodRepository.searchListingTitles(query);
+        return ResponseEntity.ok(ApiResponse.success(suggestions));
+    }
+
+    private ListingDto toDto(Listing listing) {
+        ListingDto dto = new ListingDto();
+        dto.setId(listing.getId());
+        dto.setTitle(listing.getTitle());
+        dto.setDescription(listing.getDescription());
+        dto.setCategory(listing.getCategory());
+        dto.setCondition(listing.getCondition());
+        dto.setOwnerId(listing.getOwnerId());
+        dto.setPrice(listing.getPrice());
+        dto.setPricePerDay(listing.getPricePerDay());
+        dto.setImages(listing.getImages());
+        dto.setLatitude(listing.getLatitude());
+        dto.setLongitude(listing.getLongitude());
+        dto.setNeighborhood(listing.getNeighborhood());
+        dto.setAvailable(listing.getAvailable());
+        dto.setCreatedAt(listing.getCreatedAt());
+        dto.setUpdatedAt(listing.getUpdatedAt());
+        return dto;
+    }
+}

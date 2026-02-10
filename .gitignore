@@ -1,0 +1,51 @@
+# Frontend
+share-fair-fe/node_modules/
+share-fair-fe/dist/
+share-fair-fe/.env
+share-fair-fe/.env.local
+share-fair-fe/.vscode/
+share-fair-fe/.DS_Store
+share-fair-fe/npm-debug.log*
+share-fair-fe/yarn-debug.log*
+share-fair-fe/yarn-error.log*
+
+# Backend
+share-fair-be/target/
+share-fair-be/.mvn/
+share-fair-be/mvnw
+share-fair-be/mvnw.cmd
+share-fair-be/.idea/
+share-fair-be/*.iml
+share-fair-be/.vscode/
+share-fair-be/.DS_Store
+
+# IDE
+.idea/
+.vscode/
+*.iml
+*.iws
+*.ipr
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Docker
+.dockerignore
+
+# Claude Code
+.claude/

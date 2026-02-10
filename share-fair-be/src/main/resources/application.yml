@@ -1,0 +1,49 @@
+spring:
+  application:
+    name: sharefair-api
+
+  ai:
+    ollama:
+      base-url: ${SPRING_AI_OLLAMA_BASE_URL:http://localhost:11434}
+      init:
+        pull-model-strategy: when_missing
+        timeout: 5m
+      embedding:
+        options:
+          model: all-minilm:l6-v2
+
+  datasource:
+    url: jdbc:postgresql://localhost:5432/sharefair_db
+    username: sharefair_user
+    password: sharefair_password
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+
+  flyway:
+    locations: classpath:db/migration
+    baseline-on-migrate: true
+    enabled: true
+
+server:
+  port: 8080
+  servlet:
+    context-path: /
+
+logging:
+  level:
+    root: INFO
+    com.sharefair: DEBUG
+    org.springframework.security: DEBUG
+
+jwt:
+  secret: ${JWT_SECRET:your-secret-key-change-in-production}
+  expiration: 3600000 # 1 hour
+  refresh-expiration: 604800000 # 7 days
+
+sharefair:
+  embedding:
+    similarity-threshold: ${EMBEDDING_SIMILARITY_THRESHOLD:0.8}
