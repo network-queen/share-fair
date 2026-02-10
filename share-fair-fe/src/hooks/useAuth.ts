@@ -10,12 +10,11 @@ export const useAuth = () => {
     authService.initiateOAuthLogin(provider);
   };
 
-  const handleOAuthCallback = async (code: string, provider: string, state: string) => {
+  const handleOAuthCallback = async (code: string, provider: string) => {
     try {
       const response = await authService.handleOAuthCallback({
         code,
         provider: provider as 'google' | 'facebook' | 'github',
-        state,
       });
       dispatch(setUser(response.user));
     } catch (error: unknown) {
@@ -26,6 +25,7 @@ export const useAuth = () => {
 
   const handleLogout = () => {
     dispatch(logout());
+    authService.logout();
   };
 
   const initAuth = async () => {

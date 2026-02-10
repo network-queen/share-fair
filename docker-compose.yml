@@ -43,8 +43,15 @@ services:
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/sharefair_db
       SPRING_DATASOURCE_USERNAME: sharefair_user
       SPRING_DATASOURCE_PASSWORD: sharefair_password
-      JWT_SECRET: ${JWT_SECRET:-your-secret-key-change-in-production}
+      JWT_SECRET: ${JWT_SECRET:-sharefair-dev-secret-key-min-256-bits-change-in-production-env}
       SPRING_AI_OLLAMA_BASE_URL: http://ollama:11434
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:-}
+      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET:-}
+      GITHUB_CLIENT_ID: ${GITHUB_CLIENT_ID:-}
+      GITHUB_CLIENT_SECRET: ${GITHUB_CLIENT_SECRET:-}
+      FACEBOOK_CLIENT_ID: ${FACEBOOK_CLIENT_ID:-}
+      FACEBOOK_CLIENT_SECRET: ${FACEBOOK_CLIENT_SECRET:-}
+      FRONTEND_URL: ${FRONTEND_URL:-http://localhost:5173}
     depends_on:
       postgres:
         condition: service_healthy

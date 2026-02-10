@@ -1,6 +1,8 @@
 import api from './api';
 import type { User } from '../types';
 
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080/api/v1';
+
 export interface LoginResponse {
   accessToken: string;
   refreshToken: string;
@@ -9,7 +11,6 @@ export interface LoginResponse {
 
 export interface OAuthCallbackParams {
   code: string;
-  state: string;
   provider: 'google' | 'facebook' | 'github';
 }
 
@@ -23,9 +24,9 @@ class AuthService {
     localStorage.setItem(`oauth_state_${provider}`, state);
 
     const authUrls: Record<string, string> = {
-      google: `${import.meta.env.VITE_API_BASE_URL}/auth/oauth/google?redirect_uri=${encodeURIComponent(redirectUri)}&state=${state}`,
-      facebook: `${import.meta.env.VITE_API_BASE_URL}/auth/oauth/facebook?redirect_uri=${encodeURIComponent(redirectUri)}&state=${state}`,
-      github: `${import.meta.env.VITE_API_BASE_URL}/auth/oauth/github?redirect_uri=${encodeURIComponent(redirectUri)}&state=${state}`,
+      google: `${API_BASE_URL}/auth/oauth/google?redirect_uri=${encodeURIComponent(redirectUri)}&state=${state}`,
+      facebook: `${API_BASE_URL}/auth/oauth/facebook?redirect_uri=${encodeURIComponent(redirectUri)}&state=${state}`,
+      github: `${API_BASE_URL}/auth/oauth/github?redirect_uri=${encodeURIComponent(redirectUri)}&state=${state}`,
     };
 
     window.location.href = authUrls[provider];
@@ -33,11 +34,35 @@ class AuthService {
 
   // Handle OAuth callback
   async handleOAuthCallback(params: OAuthCallbackParams): Promise<LoginResponse> {
-    const response = await api.post<LoginResponse>('/auth/oauth/callback', params);
-    if (response.data.accessToken) {
-      api.setAuthToken(response.data.accessToken);
+    const response = await api.post<LoginResponse>('/auth/oauth/callback', {
+      code: params.code,
+      provider: params.provider,
+    });
+    const data = response.data;
+    if (data.accessToken) {
+      api.setAuthToken(data.accessToken);
+      localStorage.setItem('refreshToken', data.refreshToken);
     }
-    return response.data;
+    return data;
+  }
+
+  // Refresh access token
+  async refreshAccessToken(): Promise<string | null> {
+    const refreshToken = localStorage.getItem('refreshToken');
+    if (!refreshToken) return null;
+
+    try {
+      const response = await api.post<LoginResponse>('/auth/refresh', { refreshToken });
+      const data = response.data;
+      if (data.accessToken) {
+        api.setAuthToken(data.accessToken);
+        return data.accessToken;
+      }
+      return null;
+    } catch {
+      this.logout();
+      return null;
+    }
   }
 
   // Get current user
@@ -49,6 +74,7 @@ class AuthService {
   // Logout
   logout(): void {
     api.clearAuthToken();
+    localStorage.removeItem('refreshToken');
   }
 
   // Check if user is authenticated

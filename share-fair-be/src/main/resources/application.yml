@@ -40,9 +40,23 @@ logging:
     org.springframework.security: DEBUG
 
 jwt:
-  secret: ${JWT_SECRET:your-secret-key-change-in-production}
+  secret: ${JWT_SECRET:sharefair-dev-secret-key-min-256-bits-change-in-production-env}
   expiration: 3600000 # 1 hour
   refresh-expiration: 604800000 # 7 days
+
+oauth:
+  google:
+    client-id: ${GOOGLE_CLIENT_ID:}
+    client-secret: ${GOOGLE_CLIENT_SECRET:}
+  github:
+    client-id: ${GITHUB_CLIENT_ID:}
+    client-secret: ${GITHUB_CLIENT_SECRET:}
+  facebook:
+    client-id: ${FACEBOOK_CLIENT_ID:}
+    client-secret: ${FACEBOOK_CLIENT_SECRET:}
+
+frontend:
+  url: ${FRONTEND_URL:http://localhost:5173}
 
 sharefair:
   embedding:

@@ -10,6 +10,7 @@ public interface UserRepository {
     Optional<User> findByEmail(String email);
     List<User> findAll();
     List<User> findByNeighborhood(String neighborhood);
+    Optional<User> findByOauthProviderAndOauthId(String provider, String oauthId);
     void delete(String id);
     long count();
 }

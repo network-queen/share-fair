@@ -101,6 +101,16 @@ public class UserRepositoryImpl implements UserRepository {
     }
 
     @Override
+    public Optional<User> findByOauthProviderAndOauthId(String provider, String oauthId) {
+        return dsl.select(USER_FIELDS)
+                .from(DSL.table(TABLE))
+                .where(DSL.field("oauth_provider").eq(provider))
+                .and(DSL.field("oauth_id").eq(oauthId))
+                .fetchOptional()
+                .map(this::mapToUser);
+    }
+
+    @Override
     public void delete(String id) {
         dsl.deleteFrom(DSL.table(TABLE))
                 .where(DSL.field("id").eq(UUID.fromString(id)))

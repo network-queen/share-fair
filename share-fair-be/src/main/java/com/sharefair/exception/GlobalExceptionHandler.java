@@ -40,6 +40,25 @@ public class GlobalExceptionHandler {
         );
     }
 
+    @ExceptionHandler(OAuthException.class)
+    public ResponseEntity<?> handleOAuthException(
+            OAuthException ex,
+            WebRequest request) {
+        log.error("OAuth error: {}", ex.getMessage());
+        return ResponseEntity.badRequest().body(
+                ApiResponse.error("OAUTH_ERROR", ex.getMessage())
+        );
+    }
+
+    @ExceptionHandler(InvalidTokenException.class)
+    public ResponseEntity<?> handleInvalidTokenException(
+            InvalidTokenException ex,
+            WebRequest request) {
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(
+                ApiResponse.error("INVALID_TOKEN", ex.getMessage())
+        );
+    }
+
     @ExceptionHandler(AccessDeniedException.class)
     public ResponseEntity<?> handleAccessDeniedException(
             AccessDeniedException ex,
