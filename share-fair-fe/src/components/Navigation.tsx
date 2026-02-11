@@ -30,6 +30,9 @@ const Navigation = () => {
               <Link to="/create-listing" className="text-gray-700 hover:text-primary">
                 {t('listing.create')}
               </Link>
+              <Link to="/transactions" className="text-gray-700 hover:text-primary">
+                {t('transaction.myTransactions')}
+              </Link>
               <Link to="/profile" className="text-gray-700 hover:text-primary">
                 {t('common.profile')}
               </Link>

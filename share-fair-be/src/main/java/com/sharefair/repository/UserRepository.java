@@ -11,6 +11,7 @@ public interface UserRepository {
     List<User> findAll();
     List<User> findByNeighborhood(String neighborhood);
     Optional<User> findByOauthProviderAndOauthId(String provider, String oauthId);
+    User update(User user);
     void delete(String id);
     long count();
 }

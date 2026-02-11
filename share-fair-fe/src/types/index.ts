@@ -46,6 +46,7 @@ export interface Listing {
   updatedAt: string;
   ratings?: number;
   reviewCount?: number;
+  distanceKm?: number;
 }
 
 // Transaction Types
@@ -103,6 +104,8 @@ export interface SearchParams {
   neighborhood?: string;
   category?: string;
   radius?: number;
+  lat?: number;
+  lng?: number;
   sortBy?: 'relevance' | 'distance' | 'price' | 'date';
   limit?: number;
   offset?: number;

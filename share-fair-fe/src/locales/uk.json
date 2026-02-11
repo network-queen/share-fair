@@ -24,7 +24,6 @@
     "loginTitle": "Ласкаво просимо в Sharefair",
     "loginSubtitle": "Увійдіть за допомогою вибраного провайдера",
     "loginWithGoogle": "Продовжити з Google",
-    "loginWithFacebook": "Продовжити з Facebook",
     "loginWithGithub": "Продовжити з GitHub",
     "logout": "Вихід",
     "notAuthenticated": "Будь ласка, увійдіть для продовження"
@@ -45,7 +44,11 @@
     "allNeighborhoods": "Усі мікрорайони",
     "allCategories": "Усі категорії",
     "searchButton": "Шукати",
-    "loadMore": "Завантажити ще"
+    "loadMore": "Завантажити ще",
+    "nearMe": "Поруч зі мною",
+    "mapView": "Карта",
+    "listView": "Список",
+    "locationError": "Не вдалося визначити місцезнаходження"
   },
   "listing": {
     "title": "Оголошення",
@@ -63,16 +66,75 @@
     "owner": "Власник",
     "contact": "Зв'язатися з власником",
     "rent": "Орендувати",
-    "borrow": "Позичити"
+    "borrow": "Позичити",
+    "unavailable": "Недоступно",
+    "selectCategory": "Оберіть категорію",
+    "selectCondition": "Оберіть стан",
+    "itemNamePlaceholder": "напр., Гірський велосипед, Намет",
+    "descriptionPlaceholder": "Опишіть стан речі, характеристики та умови оренди",
+    "pricePlaceholder": "Фіксована ціна",
+    "pricePerDayPlaceholder": "Ціна за день",
+    "neighborhoodPlaceholder": "напр., Центр, Оболонь",
+    "location": "Місцезнаходження",
+    "pickLocation": "Натисніть на карту, щоб вказати місцезнаходження",
+    "imagesComingSoon": "Завантаження фото скоро буде доступне"
   },
   "profile": {
     "title": "Мій профіль",
+    "name": "Ім'я",
     "trustScore": "Рейтинг довіри",
     "carbonSaved": "Вуглекислота збережена",
+    "verificationStatus": "Статус верифікації",
     "myListings": "Мої оголошення",
     "myTransactions": "Мої операції",
     "reviews": "Відгуки",
-    "edit": "Редагувати профіль"
+    "edit": "Редагувати профіль",
+    "noListings": "У вас ще немає оголошень",
+    "noTransactions": "У вас ще немає операцій"
+  },
+  "transaction": {
+    "myTransactions": "Мої операції",
+    "noTransactions": "Операцій ще немає",
+    "browseListings": "Переглянути оголошення",
+    "listing": "Оголошення",
+    "role": "Роль",
+    "dates": "Дати",
+    "amount": "Сума",
+    "statusLabel": "Статус",
+    "owner": "Власник",
+    "borrower": "Орендар",
+    "rental": "Оренда",
+    "day": "день",
+    "selectDates": "Оберіть дати оренди",
+    "startDate": "Дата початку",
+    "endDate": "Дата закінчення",
+    "totalAmount": "Загальна сума",
+    "serviceFee": "Комісія сервісу",
+    "paymentStatus": "Статус оплати",
+    "createdAt": "Створено",
+    "completedAt": "Завершено",
+    "viewListing": "Переглянути оголошення",
+    "notFound": "Операцію не знайдено",
+    "confirmRent": "Підтвердити оренду",
+    "loginToRent": "Увійдіть для оренди",
+    "datesRequired": "Будь ласка, оберіть обидві дати",
+    "endAfterStart": "Дата закінчення має бути після дати початку",
+    "accept": "Прийняти",
+    "cancel": "Скасувати",
+    "complete": "Завершити",
+    "dispute": "Оскаржити",
+    "status": {
+      "PENDING": "Очікує",
+      "ACTIVE": "Активна",
+      "COMPLETED": "Завершена",
+      "CANCELLED": "Скасована",
+      "DISPUTED": "Оскаржена"
+    }
+  },
+  "validation": {
+    "required": "Це поле обов'язкове",
+    "pricePositive": "Ціна має бути більше 0",
+    "saveFailed": "Не вдалося зберегти. Спробуйте ще раз."
   },
   "home": {
     "tagline": "Ділись. Позичай. Бережи планету.",
@@ -131,6 +193,13 @@
     "prohibitedText": "Користувачам заборонено розміщувати незаконні, небезпечні або образливі предмети. ShareFair залишає за собою право видаляти будь-які оголошення на свій розсуд.",
     "environmentTitle": "6. Відстеження екологічного впливу",
     "environmentText": "ShareFair використовує алгоритми для оцінки економії CO2. Ці дані є оціночними та надаються з метою освіти та зміцнення спільноти."
+  },
+  "payment": {
+    "payNow": "Оплатити",
+    "processing": "Обробка...",
+    "success": "Оплата успішна!",
+    "failed": "Оплата не вдалася",
+    "returnToTransaction": "Переглянути мої операції"
   },
   "about": {
     "title": "Про нас",

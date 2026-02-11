@@ -3,7 +3,6 @@ package com.sharefair.controller;
 import com.sharefair.dto.ApiResponse;
 import com.sharefair.dto.ListingDto;
 import com.sharefair.entity.Listing;
-import com.sharefair.repository.ListingRepository;
 import com.sharefair.repository.NeighborhoodRepository;
 import com.sharefair.service.SearchService;
 import org.springframework.http.ResponseEntity;
@@ -18,14 +17,11 @@ import java.util.stream.Collectors;
 @RequestMapping("/api/v1/search")
 @CrossOrigin(origins = "*")
 public class SearchController {
-    private final ListingRepository listingRepository;
     private final NeighborhoodRepository neighborhoodRepository;
     private final SearchService searchService;
 
-    public SearchController(ListingRepository listingRepository,
-                            NeighborhoodRepository neighborhoodRepository,
+    public SearchController(NeighborhoodRepository neighborhoodRepository,
                             SearchService searchService) {
-        this.listingRepository = listingRepository;
         this.neighborhoodRepository = neighborhoodRepository;
         this.searchService = searchService;
     }
@@ -36,6 +32,8 @@ public class SearchController {
             @RequestParam(required = false) String neighborhood,
             @RequestParam(required = false) String category,
             @RequestParam(required = false) Integer radius,
+            @RequestParam(required = false) Double lat,
+            @RequestParam(required = false) Double lng,
             @RequestParam(defaultValue = "relevance") String sortBy,
             @RequestParam(defaultValue = "20") int limit,
             @RequestParam(defaultValue = "0") int offset) {
@@ -43,8 +41,13 @@ public class SearchController {
         limit = Math.max(1, Math.min(limit, 100));
         offset = Math.max(0, offset);
 
-        List<Listing> listings = searchService.semanticSearch(
-                query, neighborhood, category, limit, offset);
+        List<Listing> listings;
+        if (lat != null && lng != null && "distance".equals(sortBy)) {
+            double radiusKm = radius != null ? radius : 10;
+            listings = searchService.searchByLocation(lat, lng, radiusKm, limit, offset);
+        } else {
+            listings = searchService.semanticSearch(query, neighborhood, category, limit, offset);
+        }
 
         List<ListingDto> dtos = listings.stream()
                 .map(this::toDto)
@@ -69,18 +72,29 @@ public class SearchController {
     }
 
     @GetMapping("/location")
-    public ResponseEntity<ApiResponse<List<ListingDto>>> searchByLocation(
+    public ResponseEntity<ApiResponse<Map<String, Object>>> searchByLocation(
             @RequestParam double latitude,
             @RequestParam double longitude,
-            @RequestParam(defaultValue = "5") int radius) {
-        // TODO: Search by geolocation using PostGIS - for now return all available listings
+            @RequestParam(defaultValue = "5") double radius,
+            @RequestParam(defaultValue = "20") int limit,
+            @RequestParam(defaultValue = "0") int offset) {
 
-        List<ListingDto> dtos = listingRepository.findAvailable()
-                .stream()
+        limit = Math.max(1, Math.min(limit, 100));
+        offset = Math.max(0, offset);
+        radius = Math.max(0.5, Math.min(radius, 50));
+
+        List<Listing> listings = searchService.searchByLocation(latitude, longitude, radius, limit, offset);
+
+        List<ListingDto> dtos = listings.stream()
                 .map(this::toDto)
                 .collect(Collectors.toList());
 
-        return ResponseEntity.ok(ApiResponse.success(dtos));
+        Map<String, Object> response = new HashMap<>();
+        response.put("listings", dtos);
+        response.put("total", dtos.size());
+        response.put("hasMore", dtos.size() == limit);
+
+        return ResponseEntity.ok(ApiResponse.success(response));
     }
 
     @GetMapping("/neighborhoods")
@@ -118,6 +132,7 @@ public class SearchController {
         dto.setAvailable(listing.getAvailable());
         dto.setCreatedAt(listing.getCreatedAt());
         dto.setUpdatedAt(listing.getUpdatedAt());
+        dto.setDistanceKm(listing.getDistanceKm());
         return dto;
     }
 }

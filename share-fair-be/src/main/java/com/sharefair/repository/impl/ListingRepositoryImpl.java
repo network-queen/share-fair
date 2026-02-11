@@ -268,6 +268,44 @@ public class ListingRepositoryImpl implements ListingRepository {
                 .map(this::mapToListing);
     }
 
+    @Override
+    public List<Listing> findByLocation(double lat, double lng, double radiusKm, int limit, int offset) {
+        double radiusMeters = radiusKm * 1000;
+
+        Field<Object> distanceField = DSL.field(
+                "ST_Distance(ST_MakePoint({0}, {1})::geography, ST_MakePoint(longitude, latitude)::geography)",
+                Object.class,
+                DSL.val(lng),
+                DSL.val(lat)
+        );
+
+        org.jooq.Field<?>[] fieldsWithDistance = new org.jooq.Field<?>[LISTING_FIELDS.length + 1];
+        System.arraycopy(LISTING_FIELDS, 0, fieldsWithDistance, 0, LISTING_FIELDS.length);
+        fieldsWithDistance[LISTING_FIELDS.length] = distanceField.as("distance_meters");
+
+        return dsl.select(fieldsWithDistance)
+                .from(DSL.table(TABLE))
+                .where(DSL.field("available").eq(true))
+                .and(DSL.condition(
+                        "ST_DWithin(ST_MakePoint(longitude, latitude)::geography, ST_MakePoint({0}, {1})::geography, {2})",
+                        DSL.val(lng),
+                        DSL.val(lat),
+                        DSL.val(radiusMeters)
+                ))
+                .orderBy(DSL.field("distance_meters").asc())
+                .limit(limit)
+                .offset(offset)
+                .fetch()
+                .map(record -> {
+                    Listing listing = mapToListing(record);
+                    Double distMeters = record.get(DSL.field("distance_meters"), Double.class);
+                    if (distMeters != null) {
+                        listing.setDistanceKm(distMeters / 1000.0);
+                    }
+                    return listing;
+                });
+    }
+
     private String toVectorString(float[] vector) {
         StringBuilder sb = new StringBuilder("[");
         for (int i = 0; i < vector.length; i++) {

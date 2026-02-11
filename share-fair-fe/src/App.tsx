@@ -14,6 +14,9 @@ import CreateListingPage from './pages/CreateListingPage'
 import PrivacyPolicyPage from './pages/PrivacyPolicyPage'
 import TermsOfServicePage from './pages/TermsOfServicePage'
 import AboutPage from './pages/AboutPage'
+import MyTransactionsPage from './pages/MyTransactionsPage'
+import TransactionDetailPage from './pages/TransactionDetailPage'
+import PaymentReturnPage from './pages/PaymentReturnPage'
 
 // Components - Will be created in next iteration
 import Layout from './components/Layout'
@@ -59,6 +62,24 @@ function App() {
               </ProtectedRoute>
             }
           />
+          <Route
+            path="/transactions"
+            element={
+              <ProtectedRoute isAuthenticated={isAuthenticated}>
+                <MyTransactionsPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/transactions/:id"
+            element={
+              <ProtectedRoute isAuthenticated={isAuthenticated}>
+                <TransactionDetailPage />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route path="/payment/return" element={<PaymentReturnPage />} />
 
           {/* Catch all */}
           <Route path="*" element={<Navigate to="/" replace />} />

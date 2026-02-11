@@ -39,11 +39,6 @@ public class OAuthService {
     @Value("${oauth.github.client-secret:}")
     private String githubClientSecret;
 
-    @Value("${oauth.facebook.client-id:}")
-    private String facebookClientId;
-    @Value("${oauth.facebook.client-secret:}")
-    private String facebookClientSecret;
-
     public OAuthService(RestTemplate restTemplate, UserRepository userRepository, JwtTokenProvider tokenProvider) {
         this.restTemplate = restTemplate;
         this.userRepository = userRepository;
@@ -54,7 +49,6 @@ public class OAuthService {
         return switch (provider.toLowerCase()) {
             case "google" -> buildGoogleAuthUrl(redirectUri, state);
             case "github" -> buildGitHubAuthUrl(redirectUri, state);
-            case "facebook" -> buildFacebookAuthUrl(redirectUri, state);
             default -> throw new OAuthException("Unsupported OAuth provider: " + provider);
         };
     }
@@ -63,7 +57,6 @@ public class OAuthService {
         OAuthUserInfo userInfo = switch (provider.toLowerCase()) {
             case "google" -> handleGoogleCallback(code, redirectUri);
             case "github" -> handleGitHubCallback(code, redirectUri);
-            case "facebook" -> handleFacebookCallback(code, redirectUri);
             default -> throw new OAuthException("Unsupported OAuth provider: " + provider);
         };
 
@@ -242,64 +235,6 @@ public class OAuthService {
         } catch (Exception e) {
             log.error("GitHub OAuth callback failed", e);
             throw new OAuthException("Failed to authenticate with GitHub: " + e.getMessage(), e);
-        }
-    }
-
-    // --- Facebook ---
-
-    private String buildFacebookAuthUrl(String redirectUri, String state) {
-        return UriComponentsBuilder.fromHttpUrl("https://www.facebook.com/v19.0/dialog/oauth")
-                .queryParam("client_id", facebookClientId)
-                .queryParam("redirect_uri", redirectUri)
-                .queryParam("scope", "email,public_profile")
-                .queryParam("state", state)
-                .build()
-                .toUriString();
-    }
-
-    @SuppressWarnings("unchecked")
-    private OAuthUserInfo handleFacebookCallback(String code, String redirectUri) {
-        try {
-            // Exchange code for token
-            String tokenUrl = UriComponentsBuilder.fromHttpUrl("https://graph.facebook.com/v19.0/oauth/access_token")
-                    .queryParam("client_id", facebookClientId)
-                    .queryParam("client_secret", facebookClientSecret)
-                    .queryParam("code", code)
-                    .queryParam("redirect_uri", redirectUri)
-                    .build()
-                    .toUriString();
-
-            ResponseEntity<Map> tokenResponse = restTemplate.getForEntity(tokenUrl, Map.class);
-            String accessToken = (String) tokenResponse.getBody().get("access_token");
-
-            // Fetch user info
-            String userInfoUrl = UriComponentsBuilder.fromHttpUrl("https://graph.facebook.com/v19.0/me")
-                    .queryParam("fields", "id,name,email,picture.type(large)")
-                    .queryParam("access_token", accessToken)
-                    .build()
-                    .toUriString();
-
-            ResponseEntity<Map> userResponse = restTemplate.getForEntity(userInfoUrl, Map.class);
-            Map<String, Object> userData = userResponse.getBody();
-
-            String avatar = null;
-            if (userData.get("picture") instanceof Map) {
-                Map<String, Object> picture = (Map<String, Object>) userData.get("picture");
-                if (picture.get("data") instanceof Map) {
-                    Map<String, Object> pictureData = (Map<String, Object>) picture.get("data");
-                    avatar = (String) pictureData.get("url");
-                }
-            }
-
-            return OAuthUserInfo.builder()
-                    .oauthId(String.valueOf(userData.get("id")))
-                    .email((String) userData.get("email"))
-                    .name((String) userData.get("name"))
-                    .avatar(avatar)
-                    .build();
-        } catch (Exception e) {
-            log.error("Facebook OAuth callback failed", e);
-            throw new OAuthException("Failed to authenticate with Facebook: " + e.getMessage(), e);
         }
     }
 

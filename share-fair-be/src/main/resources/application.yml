@@ -51,12 +51,14 @@ oauth:
   github:
     client-id: ${GITHUB_CLIENT_ID:}
     client-secret: ${GITHUB_CLIENT_SECRET:}
-  facebook:
-    client-id: ${FACEBOOK_CLIENT_ID:}
-    client-secret: ${FACEBOOK_CLIENT_SECRET:}
 
 frontend:
   url: ${FRONTEND_URL:http://localhost:5173}
+
+stripe:
+  secret-key: ${STRIPE_SECRET_KEY:}
+  publishable-key: ${STRIPE_PUBLISHABLE_KEY:}
+  webhook-secret: ${STRIPE_WEBHOOK_SECRET:}
 
 sharefair:
   embedding:

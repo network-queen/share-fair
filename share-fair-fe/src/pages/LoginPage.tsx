@@ -22,7 +22,7 @@ const LoginPage = () => {
 
     if (code && state && !isProcessing) {
       // Derive provider from stored state in localStorage
-      const providers = ['google', 'facebook', 'github'] as const
+      const providers = ['google', 'github'] as const
       const provider = providers.find(p => localStorage.getItem(`oauth_state_${p}`) === state)
 
       if (provider) {
@@ -62,13 +62,6 @@ const LoginPage = () => {
             className="w-full px-4 py-3 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 font-semibold flex items-center justify-center gap-2"
           >
             {t('auth.loginWithGoogle')}
-          </button>
-
-          <button
-            onClick={() => login('facebook')}
-            className="w-full px-4 py-3 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 font-semibold flex items-center justify-center gap-2"
-          >
-            {t('auth.loginWithFacebook')}
           </button>
 
           <button

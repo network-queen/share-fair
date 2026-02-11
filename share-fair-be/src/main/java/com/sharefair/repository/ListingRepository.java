@@ -25,4 +25,5 @@ public interface ListingRepository {
                                  int limit, int offset);
     void updateEmbedding(String listingId, float[] embedding);
     List<Listing> findWithoutEmbedding(int limit);
+    List<Listing> findByLocation(double lat, double lng, double radiusKm, int limit, int offset);
 }

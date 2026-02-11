@@ -2,6 +2,7 @@ import { configureStore } from '@reduxjs/toolkit';
 import authReducer from './slices/authSlice';
 import listingReducer from './slices/listingSlice';
 import searchReducer from './slices/searchSlice';
+import transactionReducer from './slices/transactionSlice';
 import uiReducer from './slices/uiSlice';
 
 export const store = configureStore({
@@ -9,6 +10,7 @@ export const store = configureStore({
     auth: authReducer,
     listing: listingReducer,
     search: searchReducer,
+    transaction: transactionReducer,
     ui: uiReducer,
   },
 });

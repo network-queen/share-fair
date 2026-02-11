@@ -111,6 +111,19 @@ public class UserRepositoryImpl implements UserRepository {
     }
 
     @Override
+    public User update(User user) {
+        user.setUpdatedAt(LocalDateTime.now());
+        dsl.update(DSL.table(TABLE))
+                .set(DSL.field("name"), user.getName())
+                .set(DSL.field("avatar"), user.getAvatar())
+                .set(DSL.field("neighborhood"), user.getNeighborhood())
+                .set(DSL.field("updated_at"), user.getUpdatedAt())
+                .where(DSL.field("id").eq(UUID.fromString(user.getId())))
+                .execute();
+        return user;
+    }
+
+    @Override
     public void delete(String id) {
         dsl.deleteFrom(DSL.table(TABLE))
                 .where(DSL.field("id").eq(UUID.fromString(id)))

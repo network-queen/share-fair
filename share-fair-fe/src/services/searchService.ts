@@ -1,5 +1,5 @@
 import api from './api';
-import type { Listing, SearchParams, SearchResult } from '../types';
+import type { SearchParams, SearchResult } from '../types';
 
 class SearchService {
   // Search listings with filters
@@ -10,6 +10,8 @@ class SearchService {
         neighborhood: params.neighborhood,
         category: params.category,
         radius: params.radius,
+        lat: params.lat,
+        lng: params.lng,
         sortBy: params.sortBy || 'relevance',
         limit: params.limit || 20,
         offset: params.offset || 0,
@@ -22,14 +24,12 @@ class SearchService {
   async searchByLocation(
     latitude: number,
     longitude: number,
-    radius: number = 5
-  ): Promise<Listing[]> {
-    const response = await api.get<Listing[]>('/search/location', {
-      params: {
-        latitude,
-        longitude,
-        radius,
-      },
+    radius: number = 5,
+    limit: number = 20,
+    offset: number = 0
+  ): Promise<SearchResult> {
+    const response = await api.get<SearchResult>('/search/location', {
+      params: { latitude, longitude, radius, limit, offset },
     });
     return response.data;
   }

@@ -9,7 +9,7 @@
 - [x] Listing CRUD API (create, read, update, delete with auto-embedding generation)
 - [x] Docker setup (PostgreSQL custom image, Ollama, Spring Boot API, docker-compose)
 - [x] React 19 + TypeScript + Vite frontend
-- [x] Redux Toolkit state management (authSlice, searchSlice, listingSlice, uiSlice)
+- [x] Redux Toolkit state management (authSlice, searchSlice, listingSlice, uiSlice, transactionSlice)
 - [x] Tailwind CSS styling
 - [x] Localization - English + Ukrainian (react-i18next, language switcher, persistent preference)
 - [x] Search page UI (filters sidebar, listing grid, load more, semantic search)
@@ -27,7 +27,7 @@
 - [x] Error typing fix (error: unknown instead of error: any)
 - [x] useAuth error handling fix (setAuthError action)
 - [x] useLanguage hook consolidation
-- [x] OAuth 2.0 authentication (Google, Facebook, GitHub)
+- [x] OAuth 2.0 authentication (Google, GitHub)
 - [x] JWT token generation, validation, and refresh (JwtTokenProvider, JwtAuthenticationFilter)
 - [x] Spring Security stateless config with JWT filter
 - [x] OAuth callback endpoint (AuthController full rewrite)
@@ -36,35 +36,26 @@
 - [x] Frontend OAuth flow (LoginPage callback, authService, api.ts interceptor)
 - [x] User auto-creation on first OAuth login
 - [x] Auth backend tests (JwtTokenProviderTest, AuthControllerTest)
+- [x] Removed Facebook OAuth (not used)
+- [x] User Service backend (UserRepository.update, UserService, UserController, DTOs)
+- [x] Transaction Service backend (Entity, Repository, Service, Controller, DTOs, state machine)
+- [x] Create Listing backend fix (auth principal for ownerId, user listings endpoint, SecurityConfig routes)
+- [x] User Service frontend (userService.ts, updateUser thunk, Profile page rewrite with inline editing)
+- [x] Transaction Service frontend (transactionService.ts, transactionSlice, MyTransactionsPage, TransactionDetailPage)
+- [x] Rent flow on ListingDetailPage (date picker, create transaction, redirect)
+- [x] Create Listing frontend fix (form state, validation, API call, cancel navigation)
+- [x] Transaction + profile + validation localization keys (EN + UK)
+- [x] Transactions nav link + routes (/transactions, /transactions/:id)
+
+---
+
+## Bugs
+
+- [ ] Create listing page: "Drop images" doesn't work (image upload not connected — placeholder shown)
 
 ---
 
 ## Backlog
-
-### User Service (Priority: High)
-- [ ] User profile API (GET/PUT /api/v1/users/{id})
-- [ ] User preferences endpoint (language, notifications)
-- [ ] Profile page - display real user data
-- [ ] Edit profile page
-- [ ] Profile image upload
-
-### Transaction Service (Priority: High)
-- [ ] Transaction model and repository (JOOQ)
-- [ ] Transaction lifecycle API (create, accept, reject, complete, cancel, dispute)
-- [ ] Booking/rental creation endpoint
-- [ ] Transaction status management (pending, active, completed, disputed)
-- [ ] Transaction history per user
-- [ ] Transaction detail page (frontend)
-- [ ] My Transactions page (frontend)
-
-### Payment Processing - Stripe (Priority: High)
-- [ ] Stripe API integration (Spring Boot)
-- [ ] PaymentService interface (abstraction for provider swap)
-- [ ] Payment Intent creation
-- [ ] Stripe webhook handler (charge.succeeded, charge.failed)
-- [ ] Service fee calculation and collection (configurable %, default 10%)
-- [ ] Payment UI on frontend (Stripe Elements or Checkout)
-- [ ] Payout to item owners
 
 ### Geolocation Search (Priority: High)
 - [ ] PostGIS distance queries (Haversine / ST_Distance)
@@ -74,6 +65,15 @@
 - [ ] Map view for search results
 - [ ] Listing location picker on create form
 - [ ] User location detection (browser geolocation API)
+
+### Payment Processing - Stripe (Priority: High)
+- [ ] Stripe API integration (Spring Boot)
+- [ ] PaymentService interface (abstraction for provider swap)
+- [ ] Payment Intent creation
+- [ ] Stripe webhook handler (charge.succeeded, charge.failed)
+- [ ] Service fee calculation and collection (configurable %, default 10%)
+- [ ] Payment UI on frontend (Stripe Elements or Checkout)
+- [ ] Payout to item owners
 
 ### Reviews & Ratings (Priority: Medium)
 - [ ] Review model and repository (JOOQ)
@@ -105,9 +105,6 @@
 - [ ] Image upload (S3/MinIO storage)
 - [ ] Multiple images per listing
 - [ ] Listing status management (active, archived, completed)
-- [ ] Create listing page - connect to real backend
-- [ ] Listing detail page - full implementation with contact owner
-- [ ] My Listings page (user's own listings)
 - [ ] Edit listing page
 - [ ] Delete listing confirmation
 
@@ -119,7 +116,6 @@
 - [ ] Email templates (welcome, transaction status, review received)
 
 ### Search Improvements (Priority: Low)
-- [ ] Geolocation search endpoint (currently returns all)
 - [ ] Sort by distance, price, date (backend support)
 - [ ] Search result highlighting
 - [ ] Recent searches

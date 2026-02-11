@@ -6,7 +6,7 @@ export const useAuth = () => {
   const dispatch = useAppDispatch();
   const auth = useAppSelector((state) => state.auth);
 
-  const login = async (provider: 'google' | 'facebook' | 'github') => {
+  const login = async (provider: 'google' | 'github') => {
     authService.initiateOAuthLogin(provider);
   };
 
@@ -14,7 +14,7 @@ export const useAuth = () => {
     try {
       const response = await authService.handleOAuthCallback({
         code,
-        provider: provider as 'google' | 'facebook' | 'github',
+        provider: provider as 'google' | 'github',
       });
       dispatch(setUser(response.user));
     } catch (error: unknown) {

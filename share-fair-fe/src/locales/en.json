@@ -24,7 +24,6 @@
     "loginTitle": "Welcome to Sharefair",
     "loginSubtitle": "Sign in with your preferred provider",
     "loginWithGoogle": "Continue with Google",
-    "loginWithFacebook": "Continue with Facebook",
     "loginWithGithub": "Continue with GitHub",
     "logout": "Logout",
     "notAuthenticated": "Please login to continue"
@@ -45,7 +44,11 @@
     "allNeighborhoods": "All neighborhoods",
     "allCategories": "All categories",
     "searchButton": "Search",
-    "loadMore": "Load more"
+    "loadMore": "Load more",
+    "nearMe": "Near Me",
+    "mapView": "Map View",
+    "listView": "List View",
+    "locationError": "Could not get your location"
   },
   "listing": {
     "title": "Listings",
@@ -63,16 +66,75 @@
     "owner": "Owner",
     "contact": "Contact Owner",
     "rent": "Rent",
-    "borrow": "Borrow"
+    "borrow": "Borrow",
+    "unavailable": "Unavailable",
+    "selectCategory": "Select a category",
+    "selectCondition": "Select condition",
+    "itemNamePlaceholder": "e.g., Mountain Bike, Camping Tent",
+    "descriptionPlaceholder": "Describe the item condition, features, and rental terms",
+    "pricePlaceholder": "Fixed price",
+    "pricePerDayPlaceholder": "Daily rental price",
+    "neighborhoodPlaceholder": "e.g., Downtown, Westside",
+    "location": "Location",
+    "pickLocation": "Click on the map to set location",
+    "imagesComingSoon": "Image upload coming soon"
   },
   "profile": {
     "title": "My Profile",
+    "name": "Name",
     "trustScore": "Trust Score",
     "carbonSaved": "Carbon Saved",
+    "verificationStatus": "Verification Status",
     "myListings": "My Listings",
     "myTransactions": "My Transactions",
     "reviews": "Reviews",
-    "edit": "Edit Profile"
+    "edit": "Edit Profile",
+    "noListings": "You don't have any listings yet",
+    "noTransactions": "You don't have any transactions yet"
+  },
+  "transaction": {
+    "myTransactions": "My Transactions",
+    "noTransactions": "No transactions yet",
+    "browseListings": "Browse Listings",
+    "listing": "Listing",
+    "role": "Role",
+    "dates": "Dates",
+    "amount": "Amount",
+    "statusLabel": "Status",
+    "owner": "Owner",
+    "borrower": "Borrower",
+    "rental": "Rental",
+    "day": "day",
+    "selectDates": "Select rental dates",
+    "startDate": "Start Date",
+    "endDate": "End Date",
+    "totalAmount": "Total Amount",
+    "serviceFee": "Service Fee",
+    "paymentStatus": "Payment Status",
+    "createdAt": "Created",
+    "completedAt": "Completed",
+    "viewListing": "View Listing",
+    "notFound": "Transaction not found",
+    "confirmRent": "Confirm Rental",
+    "loginToRent": "Login to Rent",
+    "datesRequired": "Please select both start and end dates",
+    "endAfterStart": "End date must be after start date",
+    "accept": "Accept",
+    "cancel": "Cancel",
+    "complete": "Mark Complete",
+    "dispute": "Dispute",
+    "status": {
+      "PENDING": "Pending",
+      "ACTIVE": "Active",
+      "COMPLETED": "Completed",
+      "CANCELLED": "Cancelled",
+      "DISPUTED": "Disputed"
+    }
+  },
+  "validation": {
+    "required": "This field is required",
+    "pricePositive": "Price must be greater than 0",
+    "saveFailed": "Failed to save. Please try again."
   },
   "home": {
     "tagline": "Share. Borrow. Save the planet.",
@@ -131,6 +193,13 @@
     "prohibitedText": "Users may not list illegal, hazardous, or offensive items. ShareFair reserves the right to remove any listing at its sole discretion.",
     "environmentTitle": "6. Environmental Impact Tracking",
     "environmentText": "ShareFair uses algorithms to estimate CO2 savings. These are estimates provided for educational and community-building purposes."
+  },
+  "payment": {
+    "payNow": "Pay Now",
+    "processing": "Processing...",
+    "success": "Payment Successful!",
+    "failed": "Payment Failed",
+    "returnToTransaction": "View My Transactions"
   },
   "about": {
     "title": "About Us",

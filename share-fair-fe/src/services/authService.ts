@@ -11,12 +11,12 @@ export interface LoginResponse {
 
 export interface OAuthCallbackParams {
   code: string;
-  provider: 'google' | 'facebook' | 'github';
+  provider: 'google' | 'github';
 }
 
 class AuthService {
   // OAuth Login - Redirect to provider
-  initiateOAuthLogin(provider: 'google' | 'facebook' | 'github') {
+  initiateOAuthLogin(provider: 'google' | 'github') {
     const redirectUri = `${window.location.origin}/auth/callback`;
     const stateArray = new Uint8Array(24);
     crypto.getRandomValues(stateArray);
@@ -25,7 +25,6 @@ class AuthService {
 
     const authUrls: Record<string, string> = {
       google: `${API_BASE_URL}/auth/oauth/google?redirect_uri=${encodeURIComponent(redirectUri)}&state=${state}`,
-      facebook: `${API_BASE_URL}/auth/oauth/facebook?redirect_uri=${encodeURIComponent(redirectUri)}&state=${state}`,
       github: `${API_BASE_URL}/auth/oauth/github?redirect_uri=${encodeURIComponent(redirectUri)}&state=${state}`,
     };
 

@@ -29,4 +29,6 @@ public class Listing {
     private Boolean available;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
+    @Builder.Default
+    private Double distanceKm = null;
 }

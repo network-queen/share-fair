@@ -92,6 +92,10 @@ public class SearchService {
         return count;
     }
 
+    public List<Listing> searchByLocation(double lat, double lng, double radiusKm, int limit, int offset) {
+        return listingRepository.findByLocation(lat, lng, radiusKm, limit, offset);
+    }
+
     private String buildEmbeddingText(Listing listing) {
         StringBuilder sb = new StringBuilder();
         if (listing.getTitle() != null) {

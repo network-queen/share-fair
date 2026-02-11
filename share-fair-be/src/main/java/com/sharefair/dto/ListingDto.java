@@ -31,4 +31,5 @@ public class ListingDto {
     private LocalDateTime updatedAt;
     private Double ratings;
     private Integer reviewCount;
+    private Double distanceKm;
 }

@@ -1,6 +1,7 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import type { User } from '../../types';
 import authService from '../../services/authService';
+import userService from '../../services/userService';
 
 interface AuthState {
   user: User | null;
@@ -24,6 +25,18 @@ export const getCurrentUser = createAsyncThunk('auth/getCurrentUser', async (_, 
     return rejectWithValue(message);
   }
 });
+
+export const updateUser = createAsyncThunk(
+  'auth/updateUser',
+  async ({ id, data }: { id: string; data: { name?: string; neighborhood?: string } }, { rejectWithValue }) => {
+    try {
+      return await userService.updateUser(id, data);
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : 'Failed to update profile';
+      return rejectWithValue(message);
+    }
+  }
+);
 
 const authSlice = createSlice({
   name: 'auth',
@@ -60,6 +73,9 @@ const authSlice = createSlice({
         state.isLoading = false;
         state.error = action.payload as string;
         state.isAuthenticated = false;
+      })
+      .addCase(updateUser.fulfilled, (state, action) => {
+        state.user = action.payload;
       });
   },
 });

@@ -4,9 +4,11 @@ import com.sharefair.dto.ApiResponse;
 import com.sharefair.dto.ListingDto;
 import com.sharefair.entity.Listing;
 import com.sharefair.repository.ListingRepository;
+import com.sharefair.security.UserPrincipal;
 import com.sharefair.service.SearchService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
@@ -64,12 +66,25 @@ public class ListingController {
     }
 
     @PostMapping
-    public ResponseEntity<ApiResponse<ListingDto>> createListing(@RequestBody ListingDto dto) {
+    public ResponseEntity<ApiResponse<ListingDto>> createListing(
+            @RequestBody ListingDto dto,
+            @AuthenticationPrincipal UserPrincipal principal) {
         Listing listing = fromDto(dto);
+        listing.setOwnerId(principal.getId());
+        if (listing.getLatitude() == null) listing.setLatitude(0.0);
+        if (listing.getLongitude() == null) listing.setLongitude(0.0);
         Listing saved = listingRepository.save(listing);
         searchService.generateEmbedding(saved.getId());
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(ApiResponse.success(toDto(saved)));
+    }
+
+    @GetMapping("/user/{userId}")
+    public ResponseEntity<ApiResponse<List<ListingDto>>> getUserListings(@PathVariable String userId) {
+        List<ListingDto> listings = listingRepository.findByOwnerId(userId).stream()
+                .map(this::toDto)
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(ApiResponse.success(listings));
     }
 
     @PutMapping("/{id}")
