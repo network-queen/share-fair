@@ -201,6 +201,35 @@
     "failed": "Оплата не вдалася",
     "returnToTransaction": "Переглянути мої операції"
   },
+  "review": {
+    "leaveReview": "Залишити відгук",
+    "rating": "Оцінка",
+    "comment": "Коментар",
+    "commentPlaceholder": "Поділіться своїм досвідом...",
+    "submit": "Надіслати відгук",
+    "noReviews": "Відгуків ще немає",
+    "ownerReviews": "Відгуки про власника",
+    "reviews": "Відгуки",
+    "viewAll": "Переглянути все",
+    "alreadyReviewed": "Ви вже залишили відгук для цієї операції",
+    "invalidRating": "Будь ласка, оберіть оцінку"
+  },
+  "trust": {
+    "completedTransactions": "Завершені операції",
+    "averageRating": "Середня оцінка",
+    "transactions": "операцій",
+    "tier": "Рівень довіри"
+  },
+  "carbon": {
+    "saved": "Вуглецевий слід збережено",
+    "estimated": "Очікуваний вуглецевий слід нового продукту",
+    "transactions": "Операції",
+    "history": "Історія вуглецю",
+    "noHistory": "Зберігання вуглецю ще не зафіксовано",
+    "leaderboard": "Рейтинг збереження вуглецю",
+    "communityImpact": "Вплив спільноти",
+    "totalSaved": "Загалом збережено CO₂"
+  },
   "about": {
     "title": "Про нас",
     "storyTitle": "Наша історія",

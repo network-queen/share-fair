@@ -14,4 +14,6 @@ public interface UserRepository {
     User update(User user);
     void delete(String id);
     long count();
+    void updateTrustScore(String userId, Integer trustScore);
+    void updateCarbonSaved(String userId, Integer carbonSaved);
 }

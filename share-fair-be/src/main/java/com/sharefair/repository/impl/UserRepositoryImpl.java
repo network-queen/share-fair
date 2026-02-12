@@ -139,6 +139,24 @@ public class UserRepositoryImpl implements UserRepository {
         return count != null ? count : 0L;
     }
 
+    @Override
+    public void updateTrustScore(String userId, Integer trustScore) {
+        dsl.update(DSL.table(TABLE))
+                .set(DSL.field("trust_score"), trustScore)
+                .set(DSL.field("updated_at"), LocalDateTime.now())
+                .where(DSL.field("id").eq(UUID.fromString(userId)))
+                .execute();
+    }
+
+    @Override
+    public void updateCarbonSaved(String userId, Integer carbonSaved) {
+        dsl.update(DSL.table(TABLE))
+                .set(DSL.field("carbon_saved"), carbonSaved)
+                .set(DSL.field("updated_at"), LocalDateTime.now())
+                .where(DSL.field("id").eq(UUID.fromString(userId)))
+                .execute();
+    }
+
     private User mapToUser(org.jooq.Record record) {
         return User.builder()
                 .id(record.get(DSL.field("id"), String.class))

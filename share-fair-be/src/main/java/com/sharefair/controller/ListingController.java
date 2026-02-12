@@ -3,7 +3,9 @@ package com.sharefair.controller;
 import com.sharefair.dto.ApiResponse;
 import com.sharefair.dto.ListingDto;
 import com.sharefair.entity.Listing;
+import com.sharefair.entity.Review;
 import com.sharefair.repository.ListingRepository;
+import com.sharefair.repository.ReviewRepository;
 import com.sharefair.security.UserPrincipal;
 import com.sharefair.service.SearchService;
 import org.springframework.http.HttpStatus;
@@ -24,10 +26,13 @@ import java.util.stream.Collectors;
 public class ListingController {
     private final ListingRepository listingRepository;
     private final SearchService searchService;
+    private final ReviewRepository reviewRepository;
 
-    public ListingController(ListingRepository listingRepository, SearchService searchService) {
+    public ListingController(ListingRepository listingRepository, SearchService searchService,
+                             ReviewRepository reviewRepository) {
         this.listingRepository = listingRepository;
         this.searchService = searchService;
+        this.reviewRepository = reviewRepository;
     }
 
     @GetMapping
@@ -130,6 +135,14 @@ public class ListingController {
         dto.setAvailable(listing.getAvailable());
         dto.setCreatedAt(listing.getCreatedAt());
         dto.setUpdatedAt(listing.getUpdatedAt());
+
+        List<Review> ownerReviews = reviewRepository.findByRevieweeId(listing.getOwnerId());
+        if (!ownerReviews.isEmpty()) {
+            double avgRating = ownerReviews.stream().mapToInt(Review::getRating).average().orElse(0.0);
+            dto.setRatings(avgRating);
+            dto.setReviewCount(ownerReviews.size());
+        }
+
         return dto;
     }
 

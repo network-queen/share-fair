@@ -5,6 +5,9 @@ import { useAppDispatch, useAppSelector } from '../hooks/redux'
 import { useAuth } from '../hooks/useAuth'
 import { fetchTransaction, updateTransactionStatus } from '../store/slices/transactionSlice'
 import PaymentForm from '../components/PaymentForm'
+import ReviewForm from '../components/ReviewForm'
+import reviewService from '../services/reviewService'
+import type { ReviewResponse } from '../services/reviewService'
 
 const TransactionDetailPage = () => {
   const { t } = useTranslation()
@@ -15,12 +18,26 @@ const TransactionDetailPage = () => {
   const { currentTransaction, isLoading, error } = useAppSelector((state) => state.transaction)
   const [showPayment, setShowPayment] = useState(false)
   const [paymentError, setPaymentError] = useState('')
+  const [showReviewForm, setShowReviewForm] = useState(false)
+  const [existingReview, setExistingReview] = useState<ReviewResponse | null>(null)
+  const [reviewChecked, setReviewChecked] = useState(false)
 
   useEffect(() => {
     if (id) {
       dispatch(fetchTransaction(id))
     }
   }, [id, dispatch])
+
+  useEffect(() => {
+    if (currentTransaction?.status === 'COMPLETED' && id) {
+      reviewService.checkReviewForTransaction(id)
+        .then((review) => {
+          setExistingReview(review)
+          setReviewChecked(true)
+        })
+        .catch(() => setReviewChecked(true))
+    }
+  }, [currentTransaction?.status, id])
 
   const handleStatusUpdate = async (newStatus: string) => {
     if (!id) return
@@ -29,6 +46,12 @@ const TransactionDetailPage = () => {
     } catch {
       // error handled by slice
     }
+  }
+
+  const handleReviewSubmit = async (data: { transactionId: string; revieweeId: string; rating: number; comment: string }) => {
+    const review = await reviewService.createReview(data)
+    setExistingReview(review)
+    setShowReviewForm(false)
   }
 
   if (isLoading) {
@@ -50,6 +73,8 @@ const TransactionDetailPage = () => {
   const tx = currentTransaction
   const isOwner = user?.id === tx.ownerId
   const isBorrower = user?.id === tx.borrowerId
+  const revieweeId = isOwner ? tx.borrowerId : tx.ownerId
+  const revieweeName = isOwner ? tx.borrowerName : tx.ownerName
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -189,6 +214,42 @@ const TransactionDetailPage = () => {
             </>
           )}
         </div>
+
+        {/* Review Section */}
+        {tx.status === 'COMPLETED' && reviewChecked && (
+          <div className="border-t pt-6">
+            {existingReview ? (
+              <div className="bg-green-50 p-4 rounded-lg">
+                <p className="font-semibold text-green-800 mb-2">{t('review.alreadyReviewed')}</p>
+                <div className="flex gap-0.5 mb-1">
+                  {[1, 2, 3, 4, 5].map((star) => (
+                    <span key={star} className={star <= existingReview.rating ? 'text-yellow-400' : 'text-gray-300'}>
+                      ★
+                    </span>
+                  ))}
+                </div>
+                {existingReview.comment && (
+                  <p className="text-gray-700 text-sm">{existingReview.comment}</p>
+                )}
+              </div>
+            ) : showReviewForm && id ? (
+              <ReviewForm
+                transactionId={id}
+                revieweeId={revieweeId}
+                revieweeName={revieweeName}
+                onSubmit={handleReviewSubmit}
+                onCancel={() => setShowReviewForm(false)}
+              />
+            ) : (
+              <button
+                onClick={() => setShowReviewForm(true)}
+                className="w-full px-6 py-3 bg-primary text-white font-semibold rounded-lg hover:bg-primary/90"
+              >
+                {t('review.leaveReview')}
+              </button>
+            )}
+          </div>
+        )}
       </div>
     </div>
   )

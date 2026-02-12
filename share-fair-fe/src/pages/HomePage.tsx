@@ -1,5 +1,6 @@
 import { useTranslation } from 'react-i18next'
 import { Link } from 'react-router-dom'
+import CarbonLeaderboard from '../components/CarbonLeaderboard'
 
 const HomePage = () => {
   const { t } = useTranslation()
@@ -42,6 +43,12 @@ const HomePage = () => {
             <p className="text-gray-600">{t('home.saveMoneyDesc')}</p>
           </div>
         </div>
+      </section>
+
+      {/* Community Impact */}
+      <section>
+        <h2 className="text-3xl font-bold mb-6 text-center">{t('carbon.communityImpact')}</h2>
+        <CarbonLeaderboard />
       </section>
 
       {/* CTA Section */}

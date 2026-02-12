@@ -46,6 +46,11 @@ public class SecurityConfig {
                         .requestMatchers("/api/v1/transactions/**").authenticated()
                         .requestMatchers(HttpMethod.POST, "/api/v1/payments/webhook").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/v1/payments/intent").authenticated()
+                        .requestMatchers(HttpMethod.POST, "/api/v1/reviews").authenticated()
+                        .requestMatchers(HttpMethod.GET, "/api/v1/reviews/transaction/*/check").authenticated()
+                        .requestMatchers(HttpMethod.GET, "/api/v1/reviews/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/v1/trust-scores/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/v1/carbon/**").permitAll()
                         .anyRequest().permitAll()
                 )
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);

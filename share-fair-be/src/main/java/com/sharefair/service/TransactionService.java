@@ -31,15 +31,21 @@ public class TransactionService {
     private final ListingRepository listingRepository;
     private final UserRepository userRepository;
     private final DSLContext dsl;
+    private final CarbonService carbonService;
+    private final TrustScoreService trustScoreService;
 
     public TransactionService(TransactionRepository transactionRepository,
                               ListingRepository listingRepository,
                               UserRepository userRepository,
-                              DSLContext dsl) {
+                              DSLContext dsl,
+                              CarbonService carbonService,
+                              TrustScoreService trustScoreService) {
         this.transactionRepository = transactionRepository;
         this.listingRepository = listingRepository;
         this.userRepository = userRepository;
         this.dsl = dsl;
+        this.carbonService = carbonService;
+        this.trustScoreService = trustScoreService;
     }
 
     public TransactionDto createTransaction(CreateTransactionRequest request, String borrowerId) {
@@ -126,6 +132,9 @@ public class TransactionService {
 
         if ("COMPLETED".equals(newStatus)) {
             tx.setCompletedAt(LocalDateTime.now());
+            carbonService.createCarbonRecord(id);
+            trustScoreService.recalculateTrustScore(tx.getBorrowerId());
+            trustScoreService.recalculateTrustScore(tx.getOwnerId());
         }
 
         return enrichDto(tx);

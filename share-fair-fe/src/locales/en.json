@@ -201,6 +201,35 @@
     "failed": "Payment Failed",
     "returnToTransaction": "View My Transactions"
   },
+  "review": {
+    "leaveReview": "Leave a Review",
+    "rating": "Rating",
+    "comment": "Comment",
+    "commentPlaceholder": "Share your experience...",
+    "submit": "Submit Review",
+    "noReviews": "No reviews yet",
+    "ownerReviews": "Owner Reviews",
+    "reviews": "Reviews",
+    "viewAll": "View All",
+    "alreadyReviewed": "You have already reviewed this transaction",
+    "invalidRating": "Please select a rating"
+  },
+  "trust": {
+    "completedTransactions": "Completed Transactions",
+    "averageRating": "Avg Rating",
+    "transactions": "transactions",
+    "tier": "Trust Tier"
+  },
+  "carbon": {
+    "saved": "Carbon Saved",
+    "estimated": "Estimated new product carbon",
+    "transactions": "Transactions",
+    "history": "Carbon History",
+    "noHistory": "No carbon savings recorded yet",
+    "leaderboard": "Carbon Leaderboard",
+    "communityImpact": "Community Impact",
+    "totalSaved": "Total CO₂ Saved"
+  },
   "about": {
     "title": "About Us",
     "storyTitle": "Our Story",

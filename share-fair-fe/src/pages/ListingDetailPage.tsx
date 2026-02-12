@@ -6,6 +6,12 @@ import { useAuth } from '../hooks/useAuth'
 import { fetchListing } from '../store/slices/listingSlice'
 import { createTransaction } from '../store/slices/transactionSlice'
 import ListingMap from '../components/ListingMap'
+import ReviewList from '../components/ReviewList'
+import TrustBadge from '../components/TrustBadge'
+import reviewService from '../services/reviewService'
+import trustScoreService from '../services/trustScoreService'
+import type { ReviewResponse } from '../services/reviewService'
+import type { TrustScore } from '../types'
 
 const ListingDetailPage = () => {
   const { t } = useTranslation()
@@ -20,12 +26,29 @@ const ListingDetailPage = () => {
   const [endDate, setEndDate] = useState('')
   const [rentError, setRentError] = useState('')
   const [renting, setRenting] = useState(false)
+  const [ownerReviews, setOwnerReviews] = useState<ReviewResponse[]>([])
+  const [loadingReviews, setLoadingReviews] = useState(false)
+  const [ownerTrust, setOwnerTrust] = useState<TrustScore | null>(null)
 
   useEffect(() => {
     if (id) {
       dispatch(fetchListing(id))
     }
   }, [id, dispatch])
+
+  useEffect(() => {
+    if (currentListing?.ownerId) {
+      setLoadingReviews(true)
+      reviewService.getUserReviews(currentListing.ownerId)
+        .then(setOwnerReviews)
+        .catch(() => {})
+        .finally(() => setLoadingReviews(false))
+
+      trustScoreService.getTrustScore(currentListing.ownerId)
+        .then(setOwnerTrust)
+        .catch(() => {})
+    }
+  }, [currentListing?.ownerId])
 
   const handleRent = async () => {
     if (!startDate || !endDate) {
@@ -118,10 +141,38 @@ const ListingDetailPage = () => {
           {currentListing.owner && (
             <div>
               <p className="font-semibold">{currentListing.owner.name}</p>
-              <p className="text-sm text-gray-600">{t('profile.trustScore')}: {currentListing.owner.trustScore}</p>
+              {ownerTrust ? (
+                <div className="mt-1">
+                  <TrustBadge score={ownerTrust.score} tier={ownerTrust.tier} size="sm" />
+                </div>
+              ) : (
+                <p className="text-sm text-gray-600">{t('profile.trustScore')}: {currentListing.owner.trustScore}</p>
+              )}
+            </div>
+          )}
+          {currentListing.ratings != null && currentListing.ratings > 0 && (
+            <div className="mt-2 flex items-center gap-2">
+              <div className="flex gap-0.5">
+                {[1, 2, 3, 4, 5].map((star) => (
+                  <span key={star} className={star <= Math.round(currentListing.ratings!) ? 'text-yellow-400' : 'text-gray-300'}>
+                    ★
+                  </span>
+                ))}
+              </div>
+              <span className="text-sm text-gray-600">
+                ({currentListing.reviewCount} {t('review.reviews')})
+              </span>
             </div>
           )}
         </div>
+
+        {/* Owner Reviews */}
+        {ownerReviews.length > 0 && (
+          <div>
+            <h3 className="font-bold text-lg mb-3">{t('review.ownerReviews')}</h3>
+            <ReviewList reviews={ownerReviews.slice(0, 3)} loading={loadingReviews} />
+          </div>
+        )}
 
         {/* Location Map */}
         {currentListing.latitude && currentListing.longitude &&

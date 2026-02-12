@@ -46,6 +46,12 @@
 - [x] Create Listing frontend fix (form state, validation, API call, cancel navigation)
 - [x] Transaction + profile + validation localization keys (EN + UK)
 - [x] Transactions nav link + routes (/transactions, /transactions/:id)
+- [x] Geolocation search (PostGIS distance queries, radius search, sort by proximity, Leaflet map, location picker, browser geolocation)
+- [x] Payment processing - Stripe (API integration, Payment Intent, webhook handler, service fee calculation, Stripe Elements UI)
+- [x] Reviews & ratings (Review entity/repo/service/controller, 5-star with comments, listing + profile display, self-review prevention, completed-only reviews)
+- [x] Trust score (calculation formula, Bronze/Silver/Gold/Platinum tiers, triggers on review + transaction completion, profile display, listing badge, TrustBadge component)
+- [x] Carbon saved tracker (category-based CO2 formula, record per transaction, user history + total, community leaderboard, profile carbon tab, HomePage leaderboard)
+- [x] Localization for reviews, trust score, carbon (EN + UK)
 
 ---
 
@@ -56,50 +62,6 @@
 ---
 
 ## Backlog
-
-### Geolocation Search (Priority: High)
-- [ ] PostGIS distance queries (Haversine / ST_Distance)
-- [ ] Radius-based search within neighborhood (1-10 km)
-- [ ] Sort listings by proximity
-- [ ] Map integration on frontend (Leaflet - already installed)
-- [ ] Map view for search results
-- [ ] Listing location picker on create form
-- [ ] User location detection (browser geolocation API)
-
-### Payment Processing - Stripe (Priority: High)
-- [ ] Stripe API integration (Spring Boot)
-- [ ] PaymentService interface (abstraction for provider swap)
-- [ ] Payment Intent creation
-- [ ] Stripe webhook handler (charge.succeeded, charge.failed)
-- [ ] Service fee calculation and collection (configurable %, default 10%)
-- [ ] Payment UI on frontend (Stripe Elements or Checkout)
-- [ ] Payout to item owners
-
-### Reviews & Ratings (Priority: Medium)
-- [ ] Review model and repository (JOOQ)
-- [ ] Review API (create, list by user, list by listing)
-- [ ] 5-star rating with comments
-- [ ] Review display on listing detail page
-- [ ] Review display on user profile
-- [ ] Prevent self-reviews
-- [ ] Only allow reviews after completed transaction
-
-### Trust Score (Priority: Medium)
-- [ ] Trust score calculation logic (based on completed transactions, reviews, verifications)
-- [ ] Trust level tiers (Bronze, Silver, Gold, Platinum)
-- [ ] Trust score update triggers (after review, transaction completion)
-- [ ] Trust score display on user profile
-- [ ] Trust score badge on listings
-- [ ] Verified user badges (email, phone, identity)
-- [ ] Community trust leaderboard
-
-### Carbon Saved Tracker (Priority: Medium)
-- [ ] Carbon savings calculation formula (item reuse vs new purchase)
-- [ ] Carbon record creation per transaction
-- [ ] User profile carbon impact metrics
-- [ ] Community-wide carbon savings dashboard
-- [ ] Carbon savings leaderboard
-- [ ] Carbon badge on listings ("X kg CO2 saved")
 
 ### Listing Enhancements (Priority: Medium)
 - [ ] Image upload (S3/MinIO storage)

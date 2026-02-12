@@ -6,19 +6,30 @@ import { useAppDispatch } from '../hooks/redux'
 import { updateUser } from '../store/slices/authSlice'
 import userService from '../services/userService'
 import transactionService from '../services/transactionService'
+import reviewService from '../services/reviewService'
+import carbonService from '../services/carbonService'
+import trustScoreService from '../services/trustScoreService'
+import ReviewList from '../components/ReviewList'
+import TrustBadge from '../components/TrustBadge'
 import type { TransactionResponse } from '../services/transactionService'
-import type { Listing } from '../types'
+import type { ReviewResponse } from '../services/reviewService'
+import type { Listing, TrustScore, CarbonSavedRecord } from '../types'
 
 const ProfilePage = () => {
   const { t } = useTranslation()
   const { user } = useAuth()
   const dispatch = useAppDispatch()
 
-  const [activeTab, setActiveTab] = useState<'listings' | 'transactions'>('listings')
+  const [activeTab, setActiveTab] = useState<'listings' | 'transactions' | 'reviews' | 'carbon'>('listings')
   const [listings, setListings] = useState<Listing[]>([])
   const [transactions, setTransactions] = useState<TransactionResponse[]>([])
+  const [reviews, setReviews] = useState<ReviewResponse[]>([])
+  const [carbonHistory, setCarbonHistory] = useState<CarbonSavedRecord[]>([])
+  const [trustScore, setTrustScore] = useState<TrustScore | null>(null)
   const [loadingListings, setLoadingListings] = useState(false)
   const [loadingTransactions, setLoadingTransactions] = useState(false)
+  const [loadingReviews, setLoadingReviews] = useState(false)
+  const [loadingCarbon, setLoadingCarbon] = useState(false)
 
   // Inline edit state
   const [isEditing, setIsEditing] = useState(false)
@@ -30,6 +41,9 @@ const ProfilePage = () => {
     if (user) {
       loadListings()
       loadTransactions()
+      loadReviews()
+      loadCarbonHistory()
+      loadTrustScore()
     }
   }, [user])
 
@@ -55,6 +69,42 @@ const ProfilePage = () => {
       // ignore
     } finally {
       setLoadingTransactions(false)
+    }
+  }
+
+  const loadReviews = async () => {
+    if (!user) return
+    setLoadingReviews(true)
+    try {
+      const data = await reviewService.getUserReviews(user.id)
+      setReviews(data)
+    } catch {
+      // ignore
+    } finally {
+      setLoadingReviews(false)
+    }
+  }
+
+  const loadCarbonHistory = async () => {
+    if (!user) return
+    setLoadingCarbon(true)
+    try {
+      const data = await carbonService.getUserHistory(user.id)
+      setCarbonHistory(data)
+    } catch {
+      // ignore
+    } finally {
+      setLoadingCarbon(false)
+    }
+  }
+
+  const loadTrustScore = async () => {
+    if (!user) return
+    try {
+      const data = await trustScoreService.getTrustScore(user.id)
+      setTrustScore(data)
+    } catch {
+      // ignore
     }
   }
 
@@ -170,6 +220,14 @@ const ProfilePage = () => {
         <div className="bg-gradient-to-br from-primary to-primary/80 text-white p-6 rounded-lg">
           <p className="text-sm opacity-90">{t('profile.trustScore')}</p>
           <p className="text-4xl font-bold">{user.trustScore}</p>
+          {trustScore && (
+            <div className="mt-2">
+              <TrustBadge score={trustScore.score} tier={trustScore.tier} size="sm" />
+              <p className="text-xs opacity-75 mt-1">
+                {trustScore.completedTransactions} {t('trust.transactions')} · {t('trust.averageRating')}: {trustScore.averageRating}
+              </p>
+            </div>
+          )}
         </div>
         <div className="bg-gradient-to-br from-green-500 to-green-600 text-white p-6 rounded-lg">
           <p className="text-sm opacity-90">{t('profile.carbonSaved')}</p>
@@ -195,6 +253,18 @@ const ProfilePage = () => {
             className={`px-6 py-3 font-semibold ${activeTab === 'transactions' ? 'border-b-2 border-primary text-primary' : 'text-gray-500 hover:text-gray-700'}`}
           >
             {t('profile.myTransactions')} ({transactions.length})
+          </button>
+          <button
+            onClick={() => setActiveTab('reviews')}
+            className={`px-6 py-3 font-semibold ${activeTab === 'reviews' ? 'border-b-2 border-primary text-primary' : 'text-gray-500 hover:text-gray-700'}`}
+          >
+            {t('review.reviews')} ({reviews.length})
+          </button>
+          <button
+            onClick={() => setActiveTab('carbon')}
+            className={`px-6 py-3 font-semibold ${activeTab === 'carbon' ? 'border-b-2 border-primary text-primary' : 'text-gray-500 hover:text-gray-700'}`}
+          >
+            {t('carbon.history')}
           </button>
         </div>
 
@@ -261,6 +331,40 @@ const ProfilePage = () => {
                       </div>
                     </div>
                   </Link>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+
+        {activeTab === 'reviews' && (
+          <ReviewList reviews={reviews} loading={loadingReviews} />
+        )}
+
+        {activeTab === 'carbon' && (
+          <div>
+            {loadingCarbon ? (
+              <p className="text-center py-4 text-gray-500">{t('common.loading')}</p>
+            ) : carbonHistory.length === 0 ? (
+              <p className="text-center py-8 text-gray-500">{t('carbon.noHistory')}</p>
+            ) : (
+              <div className="space-y-3">
+                {carbonHistory.map((record) => (
+                  <div key={record.id} className="bg-white rounded-lg shadow p-4">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="font-semibold text-green-600">
+                          {t('carbon.saved')}: {record.carbonSavedKg} kg CO₂
+                        </p>
+                        <p className="text-sm text-gray-500">
+                          {t('carbon.estimated')}: {record.estimatedNewProductCarbon} kg
+                        </p>
+                      </div>
+                      <p className="text-sm text-gray-500">
+                        {record.createdAt ? new Date(record.createdAt).toLocaleDateString() : ''}
+                      </p>
+                    </div>
+                  </div>
                 ))}
               </div>
             )}
