@@ -43,7 +43,7 @@ public class NotificationController {
     }
 
     @PutMapping("/{id}/read")
-    public ResponseEntity<ApiResponse<String>> markAsRead(
+    public ResponseEntity<ApiResponse<?>> markAsRead(
             @PathVariable String id,
             @AuthenticationPrincipal UserPrincipal principal) {
         notificationService.markAsRead(id);
@@ -51,7 +51,7 @@ public class NotificationController {
     }
 
     @PutMapping("/read-all")
-    public ResponseEntity<ApiResponse<String>> markAllAsRead(
+    public ResponseEntity<ApiResponse<?>> markAllAsRead(
             @AuthenticationPrincipal UserPrincipal principal) {
         notificationService.markAllAsRead(principal.getId());
         return ResponseEntity.ok(ApiResponse.success("All marked as read"));
