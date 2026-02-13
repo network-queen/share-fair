@@ -52,28 +52,26 @@
 - [x] Trust score (calculation formula, Bronze/Silver/Gold/Platinum tiers, triggers on review + transaction completion, profile display, listing badge, TrustBadge component)
 - [x] Carbon saved tracker (category-based CO2 formula, record per transaction, user history + total, community leaderboard, profile carbon tab, HomePage leaderboard)
 - [x] Localization for reviews, trust score, carbon (EN + UK)
+- [x] Listing enhancements (fix update bug, ownership auth on PUT/DELETE, edit listing page, delete confirmation, image URL inputs, listing status management with V5 migration)
+- [x] Notification service (V6 migration, entity/repo/service/controller, triggers on transaction create/status change/review, NotificationBell component with polling)
+- [x] Frontend polish (404 page, error boundary, loading skeletons for search, responsive navigation with hamburger menu)
+- [x] Localization for listings, notifications, errors (EN + UK)
 
 ---
 
 ## Bugs
 
-- [ ] Create listing page: "Drop images" doesn't work (image upload not connected — placeholder shown)
+_(none)_
 
 ---
 
 ## Backlog
 
 ### Listing Enhancements (Priority: Medium)
-- [ ] Image upload (S3/MinIO storage)
-- [ ] Multiple images per listing
-- [ ] Listing status management (active, archived, completed)
-- [ ] Edit listing page
-- [ ] Delete listing confirmation
+- [ ] Image upload (S3/MinIO storage) — currently using URL inputs as interim solution
 
 ### Notification Service (Priority: Medium)
-- [ ] Notification model and repository
 - [ ] Email notifications (transaction updates, new messages)
-- [ ] In-app notifications (bell icon, notification dropdown)
 - [ ] Notification preferences per user
 - [ ] Email templates (welcome, transaction status, review received)
 
@@ -84,10 +82,6 @@
 - [ ] Saved searches
 
 ### Frontend Polish (Priority: Low)
-- [ ] Loading skeletons for search results
-- [ ] Error boundaries
-- [ ] 404 page (currently redirects to home)
-- [ ] Responsive design audit
 - [ ] Dark mode
 - [ ] Accessibility audit (ARIA labels, keyboard navigation)
 - [ ] PWA support (service worker, offline)

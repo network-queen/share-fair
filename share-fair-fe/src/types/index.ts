@@ -42,6 +42,7 @@ export interface Listing {
   longitude: number;
   neighborhood: string;
   available: boolean;
+  status?: string;
   createdAt: string;
   updatedAt: string;
   ratings?: number;
@@ -95,6 +96,19 @@ export interface CarbonSavedRecord {
   userId: string;
   carbonSavedKg: number;
   estimatedNewProductCarbon: number;
+  createdAt: string;
+}
+
+// Notification Types
+export interface NotificationItem {
+  id: string;
+  userId: string;
+  type: string;
+  title: string;
+  message: string;
+  referenceId?: string;
+  referenceType?: string;
+  isRead: boolean;
   createdAt: string;
 }
 

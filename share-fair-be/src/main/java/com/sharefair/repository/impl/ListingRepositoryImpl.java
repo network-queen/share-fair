@@ -38,6 +38,7 @@ public class ListingRepositoryImpl implements ListingRepository {
             DSL.field("longitude"),
             DSL.field("neighborhood"),
             DSL.field("available"),
+            DSL.field("status"),
             DSL.field("created_at"),
             DSL.field("updated_at")
     };
@@ -53,6 +54,9 @@ public class ListingRepositoryImpl implements ListingRepository {
             listing.setCreatedAt(LocalDateTime.now());
         }
         listing.setUpdatedAt(LocalDateTime.now());
+        if (listing.getStatus() == null) {
+            listing.setStatus("ACTIVE");
+        }
 
         dsl.insertInto(DSL.table(TABLE))
                 .columns(LISTING_FIELDS)
@@ -70,10 +74,34 @@ public class ListingRepositoryImpl implements ListingRepository {
                         listing.getLongitude(),
                         listing.getNeighborhood(),
                         listing.getAvailable(),
+                        listing.getStatus(),
                         listing.getCreatedAt(),
                         listing.getUpdatedAt()
                 )
-                .onDuplicateKeyIgnore()
+                .execute();
+
+        return listing;
+    }
+
+    @Override
+    public Listing update(Listing listing) {
+        listing.setUpdatedAt(LocalDateTime.now());
+
+        dsl.update(DSL.table(TABLE))
+                .set(DSL.field("title"), listing.getTitle())
+                .set(DSL.field("description"), listing.getDescription())
+                .set(DSL.field("category"), listing.getCategory())
+                .set(DSL.field("condition"), listing.getCondition())
+                .set(DSL.field("price"), listing.getPrice())
+                .set(DSL.field("price_per_day"), listing.getPricePerDay())
+                .set(DSL.field("images"), listing.getImages() != null ? listing.getImages().toArray(new String[0]) : null)
+                .set(DSL.field("latitude"), listing.getLatitude())
+                .set(DSL.field("longitude"), listing.getLongitude())
+                .set(DSL.field("neighborhood"), listing.getNeighborhood())
+                .set(DSL.field("available"), listing.getAvailable())
+                .set(DSL.field("status"), listing.getStatus())
+                .set(DSL.field("updated_at"), listing.getUpdatedAt())
+                .where(DSL.field("id").eq(UUID.fromString(listing.getId())))
                 .execute();
 
         return listing;
@@ -332,6 +360,7 @@ public class ListingRepositoryImpl implements ListingRepository {
                 .longitude(record.get(DSL.field("longitude"), Double.class))
                 .neighborhood(record.get(DSL.field("neighborhood"), String.class))
                 .available(record.get(DSL.field("available"), Boolean.class))
+                .status(record.get(DSL.field("status"), String.class))
                 .createdAt(toLocalDateTime(record.get(DSL.field("created_at"))))
                 .updatedAt(toLocalDateTime(record.get(DSL.field("updated_at"))))
                 .build();

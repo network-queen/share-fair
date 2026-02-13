@@ -8,6 +8,7 @@ import { createTransaction } from '../store/slices/transactionSlice'
 import ListingMap from '../components/ListingMap'
 import ReviewList from '../components/ReviewList'
 import TrustBadge from '../components/TrustBadge'
+import listingService from '../services/listingService'
 import reviewService from '../services/reviewService'
 import trustScoreService from '../services/trustScoreService'
 import type { ReviewResponse } from '../services/reviewService'
@@ -29,6 +30,8 @@ const ListingDetailPage = () => {
   const [ownerReviews, setOwnerReviews] = useState<ReviewResponse[]>([])
   const [loadingReviews, setLoadingReviews] = useState(false)
   const [ownerTrust, setOwnerTrust] = useState<TrustScore | null>(null)
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
+  const [deleting, setDeleting] = useState(false)
 
   useEffect(() => {
     if (id) {
@@ -72,6 +75,18 @@ const ListingDetailPage = () => {
       setRentError(err || t('common.error'))
     } finally {
       setRenting(false)
+    }
+  }
+
+  const handleDelete = async () => {
+    if (!id) return
+    setDeleting(true)
+    try {
+      await listingService.deleteListing(id)
+      navigate('/profile')
+    } catch {
+      setDeleting(false)
+      setShowDeleteConfirm(false)
     }
   }
 
@@ -180,6 +195,46 @@ const ListingDetailPage = () => {
           <div>
             <h3 className="font-bold text-lg mb-2">{t('listing.location')}</h3>
             <ListingMap listings={[currentListing]} className="h-[250px]" />
+          </div>
+        )}
+
+        {/* Owner Actions */}
+        {isOwner && (
+          <div className="space-y-3">
+            <div className="flex gap-3">
+              <button
+                onClick={() => navigate(`/listing/${id}/edit`)}
+                className="flex-1 px-6 py-3 bg-primary text-white font-bold rounded-lg hover:bg-primary/90"
+              >
+                {t('listing.edit')}
+              </button>
+              <button
+                onClick={() => setShowDeleteConfirm(true)}
+                className="flex-1 px-6 py-3 bg-red-600 text-white font-bold rounded-lg hover:bg-red-700"
+              >
+                {t('listing.deleteListing')}
+              </button>
+            </div>
+            {showDeleteConfirm && (
+              <div className="bg-red-50 border border-red-200 p-4 rounded-lg">
+                <p className="text-red-800 mb-3">{t('listing.deleteConfirm')}</p>
+                <div className="flex gap-3">
+                  <button
+                    onClick={handleDelete}
+                    disabled={deleting}
+                    className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:opacity-50"
+                  >
+                    {deleting ? t('common.loading') : t('common.delete')}
+                  </button>
+                  <button
+                    onClick={() => setShowDeleteConfirm(false)}
+                    className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50"
+                  >
+                    {t('common.cancel')}
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
         )}
 

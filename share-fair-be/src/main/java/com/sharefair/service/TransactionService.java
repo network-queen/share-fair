@@ -33,19 +33,22 @@ public class TransactionService {
     private final DSLContext dsl;
     private final CarbonService carbonService;
     private final TrustScoreService trustScoreService;
+    private final NotificationService notificationService;
 
     public TransactionService(TransactionRepository transactionRepository,
                               ListingRepository listingRepository,
                               UserRepository userRepository,
                               DSLContext dsl,
                               CarbonService carbonService,
-                              TrustScoreService trustScoreService) {
+                              TrustScoreService trustScoreService,
+                              NotificationService notificationService) {
         this.transactionRepository = transactionRepository;
         this.listingRepository = listingRepository;
         this.userRepository = userRepository;
         this.dsl = dsl;
         this.carbonService = carbonService;
         this.trustScoreService = trustScoreService;
+        this.notificationService = notificationService;
     }
 
     public TransactionDto createTransaction(CreateTransactionRequest request, String borrowerId) {
@@ -86,6 +89,10 @@ public class TransactionService {
                 .build();
 
         Transaction saved = transactionRepository.save(transaction);
+
+        String borrowerName = userRepository.findById(borrowerId).map(User::getName).orElse("Someone");
+        notificationService.notifyNewTransaction(listing.getOwnerId(), borrowerName, listing.getTitle(), saved.getId());
+
         return enrichDto(saved);
     }
 
@@ -136,6 +143,11 @@ public class TransactionService {
             trustScoreService.recalculateTrustScore(tx.getBorrowerId());
             trustScoreService.recalculateTrustScore(tx.getOwnerId());
         }
+
+        String listingTitle = listingRepository.findById(tx.getListingId())
+                .map(Listing::getTitle).orElse("Listing");
+        String notifyUserId = principalId.equals(tx.getOwnerId()) ? tx.getBorrowerId() : tx.getOwnerId();
+        notificationService.notifyTransactionStatusChange(notifyUserId, newStatus, listingTitle, id);
 
         return enrichDto(tx);
     }

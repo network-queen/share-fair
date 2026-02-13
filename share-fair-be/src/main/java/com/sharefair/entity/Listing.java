@@ -27,6 +27,7 @@ public class Listing {
     private Double longitude;
     private String neighborhood;
     private Boolean available;
+    private String status;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
     @Builder.Default

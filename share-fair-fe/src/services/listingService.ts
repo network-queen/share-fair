@@ -36,6 +36,14 @@ class ListingService {
     await api.delete(`/listings/${id}`);
   }
 
+  // Update listing status
+  async updateListingStatus(id: string, status: string): Promise<Listing> {
+    const response = await api.patch<Listing>(`/listings/${id}/status`, null, {
+      params: { status },
+    });
+    return response.data;
+  }
+
   // Get listings by user
   async getUserListings(userId: string): Promise<Listing[]> {
     const response = await api.get<Listing[]>(`/listings/user/${userId}`);

@@ -1,5 +1,5 @@
 import { useEffect } from 'react'
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom'
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
 import { useAuth } from './hooks/useAuth'
 import { useLanguage } from './hooks/useLanguage'
 
@@ -17,6 +17,8 @@ import AboutPage from './pages/AboutPage'
 import MyTransactionsPage from './pages/MyTransactionsPage'
 import TransactionDetailPage from './pages/TransactionDetailPage'
 import PaymentReturnPage from './pages/PaymentReturnPage'
+import EditListingPage from './pages/EditListingPage'
+import NotFoundPage from './pages/NotFoundPage'
 
 // Components - Will be created in next iteration
 import Layout from './components/Layout'
@@ -55,6 +57,14 @@ function App() {
             }
           />
           <Route
+            path="/listing/:id/edit"
+            element={
+              <ProtectedRoute isAuthenticated={isAuthenticated}>
+                <EditListingPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
             path="/create-listing"
             element={
               <ProtectedRoute isAuthenticated={isAuthenticated}>
@@ -82,7 +92,7 @@ function App() {
           <Route path="/payment/return" element={<PaymentReturnPage />} />
 
           {/* Catch all */}
-          <Route path="*" element={<Navigate to="/" replace />} />
+          <Route path="*" element={<NotFoundPage />} />
         </Routes>
       </Layout>
     </Router>

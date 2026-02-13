@@ -22,15 +22,18 @@ public class ReviewService {
     private final TransactionRepository transactionRepository;
     private final UserRepository userRepository;
     private final TrustScoreService trustScoreService;
+    private final NotificationService notificationService;
 
     public ReviewService(ReviewRepository reviewRepository,
                          TransactionRepository transactionRepository,
                          UserRepository userRepository,
-                         TrustScoreService trustScoreService) {
+                         TrustScoreService trustScoreService,
+                         NotificationService notificationService) {
         this.reviewRepository = reviewRepository;
         this.transactionRepository = transactionRepository;
         this.userRepository = userRepository;
         this.trustScoreService = trustScoreService;
+        this.notificationService = notificationService;
     }
 
     public ReviewDto createReview(CreateReviewRequest request, String reviewerId) {
@@ -72,6 +75,9 @@ public class ReviewService {
         Review saved = reviewRepository.save(review);
 
         trustScoreService.recalculateTrustScore(request.getRevieweeId());
+
+        String reviewerName = userRepository.findById(reviewerId).map(User::getName).orElse("Someone");
+        notificationService.notifyNewReview(request.getRevieweeId(), reviewerName, request.getRating(), request.getTransactionId());
 
         return enrichDto(saved);
     }

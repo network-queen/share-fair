@@ -51,6 +51,8 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/api/v1/reviews/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/v1/trust-scores/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/v1/carbon/**").permitAll()
+                        .requestMatchers("/api/v1/notifications/**").authenticated()
+                        .requestMatchers(HttpMethod.PATCH, "/api/v1/listings/**").authenticated()
                         .anyRequest().permitAll()
                 )
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);

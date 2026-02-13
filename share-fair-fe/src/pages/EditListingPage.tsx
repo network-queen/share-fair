@@ -1,15 +1,18 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useParams } from 'react-router-dom'
+import { useAuth } from '../hooks/useAuth'
 import listingService from '../services/listingService'
 import LocationPicker from '../components/LocationPicker'
 
 const CATEGORIES = ['Electronics', 'Sports & Outdoors', 'Tools', 'Furniture', 'Books', 'Clothing', 'Other']
 const CONDITIONS = ['EXCELLENT', 'GOOD', 'FAIR', 'POOR']
 
-const CreateListingPage = () => {
+const EditListingPage = () => {
   const { t } = useTranslation()
   const navigate = useNavigate()
+  const { id } = useParams<{ id: string }>()
+  const { user } = useAuth()
 
   const [title, setTitle] = useState('')
   const [description, setDescription] = useState('')
@@ -21,8 +24,32 @@ const CreateListingPage = () => {
   const [latitude, setLatitude] = useState(0)
   const [longitude, setLongitude] = useState(0)
   const [imageUrls, setImageUrls] = useState<string[]>([''])
+  const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [errors, setErrors] = useState<Record<string, string>>({})
+
+  useEffect(() => {
+    if (!id) return
+    listingService.getListing(id)
+      .then((listing) => {
+        if (listing.ownerId !== user?.id) {
+          navigate('/')
+          return
+        }
+        setTitle(listing.title)
+        setDescription(listing.description)
+        setCategory(listing.category)
+        setCondition(listing.condition)
+        setPrice(String(listing.price))
+        setPricePerDay(listing.pricePerDay ? String(listing.pricePerDay) : '')
+        setNeighborhood(listing.neighborhood || '')
+        setLatitude(listing.latitude || 0)
+        setLongitude(listing.longitude || 0)
+        setImageUrls(listing.images?.length ? listing.images : [''])
+      })
+      .catch(() => navigate('/'))
+      .finally(() => setLoading(false))
+  }, [id, user?.id, navigate])
 
   const validate = (): boolean => {
     const newErrors: Record<string, string> = {}
@@ -37,16 +64,15 @@ const CreateListingPage = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!validate()) return
+    if (!validate() || !id) return
 
     setSaving(true)
     try {
-      const listing = await listingService.createListing({
+      await listingService.updateListing(id, {
         title: title.trim(),
         description: description.trim(),
         category,
         condition: condition as any,
-        ownerId: '',
         price: parseFloat(price),
         pricePerDay: pricePerDay ? parseFloat(pricePerDay) : undefined,
         images: imageUrls.filter((u) => u.trim()),
@@ -55,7 +81,7 @@ const CreateListingPage = () => {
         neighborhood: neighborhood.trim(),
         available: true,
       })
-      navigate(`/listing/${listing.id}`)
+      navigate(`/listing/${id}`)
     } catch {
       setErrors({ form: t('validation.saveFailed') })
     } finally {
@@ -63,12 +89,32 @@ const CreateListingPage = () => {
     }
   }
 
+  const addImageUrl = () => {
+    if (imageUrls.length < 5) {
+      setImageUrls([...imageUrls, ''])
+    }
+  }
+
+  const removeImageUrl = (index: number) => {
+    setImageUrls(imageUrls.filter((_, i) => i !== index))
+  }
+
+  const updateImageUrl = (index: number, value: string) => {
+    const updated = [...imageUrls]
+    updated[index] = value
+    setImageUrls(updated)
+  }
+
   const inputClass = (field: string) =>
     `w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary ${errors[field] ? 'border-red-400' : 'border-gray-300'}`
 
+  if (loading) {
+    return <p className="text-center py-8">{t('common.loading')}</p>
+  }
+
   return (
     <div className="max-w-2xl mx-auto">
-      <h1 className="text-3xl font-bold mb-8">{t('listing.create')}</h1>
+      <h1 className="text-3xl font-bold mb-8">{t('listing.edit')}</h1>
 
       {errors.form && (
         <div className="mb-6 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
@@ -77,7 +123,6 @@ const CreateListingPage = () => {
       )}
 
       <form onSubmit={handleSubmit} className="space-y-6">
-        {/* Basic Info */}
         <div>
           <label className="block font-semibold mb-2">{t('listing.itemName')}</label>
           <input
@@ -102,7 +147,6 @@ const CreateListingPage = () => {
           {errors.description && <p className="text-red-500 text-sm mt-1">{errors.description}</p>}
         </div>
 
-        {/* Category & Condition */}
         <div className="grid grid-cols-2 gap-6">
           <div>
             <label className="block font-semibold mb-2">{t('listing.category')}</label>
@@ -134,7 +178,6 @@ const CreateListingPage = () => {
           </div>
         </div>
 
-        {/* Pricing */}
         <div className="grid grid-cols-2 gap-6">
           <div>
             <label className="block font-semibold mb-2">{t('listing.price')}</label>
@@ -163,7 +206,6 @@ const CreateListingPage = () => {
           </div>
         </div>
 
-        {/* Neighborhood */}
         <div>
           <label className="block font-semibold mb-2">{t('search.neighborhood')}</label>
           <input
@@ -175,7 +217,6 @@ const CreateListingPage = () => {
           />
         </div>
 
-        {/* Location Picker */}
         <div>
           <label className="block font-semibold mb-2">{t('listing.location')}</label>
           <LocationPicker
@@ -194,18 +235,14 @@ const CreateListingPage = () => {
                 <input
                   type="url"
                   value={url}
-                  onChange={(e) => {
-                    const updated = [...imageUrls]
-                    updated[index] = e.target.value
-                    setImageUrls(updated)
-                  }}
+                  onChange={(e) => updateImageUrl(index, e.target.value)}
                   placeholder={t('listing.addImageUrl')}
                   className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
                 />
                 {imageUrls.length > 1 && (
                   <button
                     type="button"
-                    onClick={() => setImageUrls(imageUrls.filter((_, i) => i !== index))}
+                    onClick={() => removeImageUrl(index)}
                     className="px-3 py-2 text-red-600 hover:bg-red-50 rounded-lg"
                   >
                     {t('listing.removeImage')}
@@ -216,13 +253,14 @@ const CreateListingPage = () => {
             {imageUrls.length < 5 && (
               <button
                 type="button"
-                onClick={() => setImageUrls([...imageUrls, ''])}
+                onClick={addImageUrl}
                 className="text-sm text-primary hover:underline"
               >
                 + {t('listing.addImageUrl')}
               </button>
             )}
           </div>
+          {/* Image previews */}
           {imageUrls.some((u) => u.trim()) && (
             <div className="grid grid-cols-5 gap-2 mt-3">
               {imageUrls.filter((u) => u.trim()).map((url, index) => (
@@ -234,7 +272,6 @@ const CreateListingPage = () => {
           )}
         </div>
 
-        {/* Submit */}
         <div className="flex gap-4">
           <button
             type="submit"
@@ -245,7 +282,7 @@ const CreateListingPage = () => {
           </button>
           <button
             type="button"
-            onClick={() => navigate(-1)}
+            onClick={() => navigate(`/listing/${id}`)}
             className="flex-1 px-6 py-3 border border-gray-300 font-bold rounded-lg hover:bg-gray-50"
           >
             {t('common.cancel')}
@@ -256,4 +293,4 @@ const CreateListingPage = () => {
   )
 }
 
-export default CreateListingPage
+export default EditListingPage

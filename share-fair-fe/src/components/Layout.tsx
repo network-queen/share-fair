@@ -1,5 +1,6 @@
 import Navigation from './Navigation'
 import Footer from './Footer'
+import ErrorBoundary from './ErrorBoundary'
 
 interface LayoutProps {
   children: React.ReactNode
@@ -11,7 +12,9 @@ const Layout = ({ children }: LayoutProps) => {
     <div className="flex flex-col min-h-screen bg-white">
       <Navigation />
       <main className="flex-grow container mx-auto px-4 py-8">
-        {children}
+        <ErrorBoundary>
+          {children}
+        </ErrorBoundary>
       </main>
       <Footer />
     </div>

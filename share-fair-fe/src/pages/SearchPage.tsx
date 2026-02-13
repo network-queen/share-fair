@@ -4,6 +4,7 @@ import { useSearch } from '../hooks/useSearch'
 import { useGeolocation } from '../hooks/useGeolocation'
 import { Link } from 'react-router-dom'
 import ListingMap from '../components/ListingMap'
+import ListingCardSkeleton from '../components/ListingCardSkeleton'
 
 const SearchPage = () => {
   const { t } = useTranslation()
@@ -76,9 +77,9 @@ const SearchPage = () => {
   }, [latitude, longitude]) // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
-    <div className="grid grid-cols-4 gap-8">
+    <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
       {/* Sidebar Filters */}
-      <aside className="col-span-1 bg-gray-50 p-6 rounded-lg h-fit sticky top-4">
+      <aside className="lg:col-span-1 bg-gray-50 p-6 rounded-lg h-fit sticky top-4">
         <h3 className="font-bold text-lg mb-4">{t('search.title')}</h3>
 
         {/* Search Query */}
@@ -180,7 +181,7 @@ const SearchPage = () => {
       </aside>
 
       {/* Results */}
-      <div className="col-span-3">
+      <div className="lg:col-span-3">
         {/* View Toggle */}
         <div className="flex justify-end mb-4 gap-2">
           <button
@@ -251,7 +252,15 @@ const SearchPage = () => {
               ))}
             </div>
 
-            {isLoading && <p className="text-center py-8">{t('common.loading')}</p>}
+            {isLoading && results.length === 0 && (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {Array.from({ length: 6 }).map((_, i) => (
+                  <ListingCardSkeleton key={i} />
+                ))}
+              </div>
+            )}
+
+            {isLoading && results.length > 0 && <p className="text-center py-8">{t('common.loading')}</p>}
 
             {hasMore && !isLoading && (
               <div className="text-center py-8">

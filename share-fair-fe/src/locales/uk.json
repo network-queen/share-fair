@@ -77,7 +77,13 @@
     "neighborhoodPlaceholder": "напр., Центр, Оболонь",
     "location": "Місцезнаходження",
     "pickLocation": "Натисніть на карту, щоб вказати місцезнаходження",
-    "imagesComingSoon": "Завантаження фото скоро буде доступне"
+    "imagesComingSoon": "Завантаження фото скоро буде доступне",
+    "deleteListing": "Видалити оголошення",
+    "deleteConfirm": "Ви впевнені, що хочете видалити це оголошення? Цю дію неможливо скасувати.",
+    "addImageUrl": "Додати URL зображення",
+    "removeImage": "Видалити",
+    "statusActive": "Активне",
+    "statusArchived": "Архівоване"
   },
   "profile": {
     "title": "Мій профіль",
@@ -229,6 +235,17 @@
     "leaderboard": "Рейтинг збереження вуглецю",
     "communityImpact": "Вплив спільноти",
     "totalSaved": "Загалом збережено CO₂"
+  },
+  "notification": {
+    "notifications": "Сповіщення",
+    "markAllRead": "Позначити все як прочитане",
+    "noNotifications": "Сповіщень ще немає",
+    "justNow": "Щойно"
+  },
+  "error": {
+    "pageNotFound": "Сторінку не знайдено",
+    "somethingWentWrong": "Щось пішло не так",
+    "tryAgain": "Спробувати ще раз"
   },
   "about": {
     "title": "Про нас",

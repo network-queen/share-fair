@@ -95,12 +95,19 @@ public class ListingController {
     @PutMapping("/{id}")
     public ResponseEntity<ApiResponse<ListingDto>> updateListing(
             @PathVariable String id,
-            @RequestBody ListingDto dto) {
+            @RequestBody ListingDto dto,
+            @AuthenticationPrincipal UserPrincipal principal) {
         return listingRepository.findById(id)
                 .map(existing -> {
+                    if (!existing.getOwnerId().equals(principal.getId())) {
+                        return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                                .<ApiResponse<ListingDto>>body((ApiResponse<ListingDto>) ApiResponse.error("You can only edit your own listings"));
+                    }
                     Listing listing = fromDto(dto);
                     listing.setId(id);
-                    Listing updated = listingRepository.save(listing);
+                    listing.setOwnerId(existing.getOwnerId());
+                    listing.setCreatedAt(existing.getCreatedAt());
+                    Listing updated = listingRepository.update(listing);
                     searchService.generateEmbedding(updated.getId());
                     return ResponseEntity.ok(ApiResponse.success(toDto(updated)));
                 })
@@ -109,13 +116,40 @@ public class ListingController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<?> deleteListing(@PathVariable String id) {
-        if (listingRepository.findById(id).isPresent()) {
-            listingRepository.delete(id);
-            return ResponseEntity.ok(ApiResponse.success("Listing deleted successfully"));
-        }
-        return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                .body(ApiResponse.error("Listing not found"));
+    public ResponseEntity<?> deleteListing(
+            @PathVariable String id,
+            @AuthenticationPrincipal UserPrincipal principal) {
+        return listingRepository.findById(id)
+                .map(existing -> {
+                    if (!existing.getOwnerId().equals(principal.getId())) {
+                        return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                                .body(ApiResponse.error("You can only delete your own listings"));
+                    }
+                    listingRepository.delete(id);
+                    return ResponseEntity.ok(ApiResponse.success("Listing deleted successfully"));
+                })
+                .orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND)
+                        .body(ApiResponse.error("Listing not found")));
+    }
+
+    @PatchMapping("/{id}/status")
+    public ResponseEntity<ApiResponse<ListingDto>> updateListingStatus(
+            @PathVariable String id,
+            @RequestParam String status,
+            @AuthenticationPrincipal UserPrincipal principal) {
+        return listingRepository.findById(id)
+                .map(existing -> {
+                    if (!existing.getOwnerId().equals(principal.getId())) {
+                        return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                                .<ApiResponse<ListingDto>>body((ApiResponse<ListingDto>) ApiResponse.error("You can only update your own listings"));
+                    }
+                    existing.setStatus(status);
+                    existing.setAvailable("ACTIVE".equals(status));
+                    Listing updated = listingRepository.update(existing);
+                    return ResponseEntity.ok(ApiResponse.success(toDto(updated)));
+                })
+                .orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND)
+                        .body((ApiResponse<ListingDto>) ApiResponse.error("Listing not found")));
     }
 
     private ListingDto toDto(Listing listing) {
@@ -133,6 +167,7 @@ public class ListingController {
         dto.setLongitude(listing.getLongitude());
         dto.setNeighborhood(listing.getNeighborhood());
         dto.setAvailable(listing.getAvailable());
+        dto.setStatus(listing.getStatus());
         dto.setCreatedAt(listing.getCreatedAt());
         dto.setUpdatedAt(listing.getUpdatedAt());
 
@@ -161,6 +196,7 @@ public class ListingController {
                 .longitude(dto.getLongitude())
                 .neighborhood(dto.getNeighborhood())
                 .available(dto.getAvailable())
+                .status(dto.getStatus())
                 .createdAt(dto.getCreatedAt())
                 .updatedAt(dto.getUpdatedAt())
                 .build();

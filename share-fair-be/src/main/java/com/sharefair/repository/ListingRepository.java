@@ -6,6 +6,7 @@ import java.util.Optional;
 
 public interface ListingRepository {
     Listing save(Listing listing);
+    Listing update(Listing listing);
     Optional<Listing> findById(String id);
     List<Listing> findAll();
     List<Listing> findByOwnerId(String ownerId);
