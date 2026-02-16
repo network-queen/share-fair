@@ -56,6 +56,13 @@
 - [x] Notification service (V6 migration, entity/repo/service/controller, triggers on transaction create/status change/review, NotificationBell component with polling)
 - [x] Frontend polish (404 page, error boundary, loading skeletons for search, responsive navigation with hamburger menu)
 - [x] Localization for listings, notifications, errors (EN + UK)
+- [x] Email notification service (Spring Boot Mail + Thymeleaf templates: welcome, transaction, review)
+- [x] Notification preferences per user (V9 migration, entity/repo/service/controller, profile Settings tab)
+- [x] Search sort by distance, price, date (backend JOOQ + frontend controls)
+- [x] Search result highlighting (HighlightText component)
+- [x] Recent searches (localStorage, max 10, dropdown on focus)
+- [x] Saved searches (localStorage, max 20, sidebar section)
+- [x] Image upload with MinIO (S3-compatible storage, drag & drop, backend multipart upload, Docker Compose)
 
 ---
 
@@ -66,20 +73,6 @@ _(none)_
 ---
 
 ## Backlog
-
-### Listing Enhancements (Priority: Medium)
-- [ ] Image upload (S3/MinIO storage) — currently using URL inputs as interim solution
-
-### Notification Service (Priority: Medium)
-- [ ] Email notifications (transaction updates, new messages)
-- [ ] Notification preferences per user
-- [ ] Email templates (welcome, transaction status, review received)
-
-### Search Improvements (Priority: Low)
-- [ ] Sort by distance, price, date (backend support)
-- [ ] Search result highlighting
-- [ ] Recent searches
-- [ ] Saved searches
 
 ### Frontend Polish (Priority: Low)
 - [ ] Dark mode

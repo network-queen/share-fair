@@ -8,13 +8,17 @@ import com.sharefair.repository.ListingRepository;
 import com.sharefair.repository.ReviewRepository;
 import com.sharefair.security.UserPrincipal;
 import com.sharefair.service.SearchService;
+import com.sharefair.service.ImageStorageService;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -27,12 +31,14 @@ public class ListingController {
     private final ListingRepository listingRepository;
     private final SearchService searchService;
     private final ReviewRepository reviewRepository;
+    private final ImageStorageService imageStorageService;
 
     public ListingController(ListingRepository listingRepository, SearchService searchService,
-                             ReviewRepository reviewRepository) {
+                             ReviewRepository reviewRepository, ImageStorageService imageStorageService) {
         this.listingRepository = listingRepository;
         this.searchService = searchService;
         this.reviewRepository = reviewRepository;
+        this.imageStorageService = imageStorageService;
     }
 
     @GetMapping
@@ -154,6 +160,59 @@ public class ListingController {
                 })
                 .orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND)
                         .body((ApiResponse<ListingDto>) ApiResponse.error("Listing not found")));
+    }
+
+    @PostMapping(value = "/{id}/images", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<ApiResponse<List<String>>> uploadImages(
+            @PathVariable String id,
+            @RequestParam("files") List<MultipartFile> files,
+            @AuthenticationPrincipal UserPrincipal principal) {
+        return listingRepository.findById(id)
+                .map(existing -> {
+                    if (!existing.getOwnerId().equals(principal.getId())) {
+                        return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                                .<ApiResponse<List<String>>>body((ApiResponse<List<String>>) ApiResponse.error("You can only upload images to your own listings"));
+                    }
+                    if (files.size() > 5) {
+                        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                                .<ApiResponse<List<String>>>body((ApiResponse<List<String>>) ApiResponse.error("Maximum 5 images allowed"));
+                    }
+                    List<String> urls = imageStorageService.uploadImages(id, files);
+                    // Append new URLs to existing images
+                    List<String> allImages = new ArrayList<>(existing.getImages() != null ? existing.getImages() : List.of());
+                    allImages.addAll(urls);
+                    // Cap at 5 images total
+                    if (allImages.size() > 5) {
+                        allImages = allImages.subList(0, 5);
+                    }
+                    existing.setImages(allImages);
+                    listingRepository.update(existing);
+                    return ResponseEntity.ok(ApiResponse.success(allImages));
+                })
+                .orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND)
+                        .body((ApiResponse<List<String>>) ApiResponse.error("Listing not found")));
+    }
+
+    @DeleteMapping("/{id}/images")
+    public ResponseEntity<ApiResponse<List<String>>> deleteImage(
+            @PathVariable String id,
+            @RequestParam String imageUrl,
+            @AuthenticationPrincipal UserPrincipal principal) {
+        return listingRepository.findById(id)
+                .map(existing -> {
+                    if (!existing.getOwnerId().equals(principal.getId())) {
+                        return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                                .<ApiResponse<List<String>>>body((ApiResponse<List<String>>) ApiResponse.error("You can only delete images from your own listings"));
+                    }
+                    imageStorageService.deleteImage(imageUrl);
+                    List<String> updatedImages = new ArrayList<>(existing.getImages() != null ? existing.getImages() : List.of());
+                    updatedImages.remove(imageUrl);
+                    existing.setImages(updatedImages);
+                    listingRepository.update(existing);
+                    return ResponseEntity.ok(ApiResponse.success(updatedImages));
+                })
+                .orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND)
+                        .body((ApiResponse<List<String>>) ApiResponse.error("Listing not found")));
     }
 
     private ListingDto toDto(Listing listing) {

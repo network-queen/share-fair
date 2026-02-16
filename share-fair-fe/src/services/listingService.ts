@@ -62,6 +62,14 @@ class ListingService {
     });
     return response.data;
   }
+
+  // Delete a listing image
+  async deleteImage(listingId: string, imageUrl: string): Promise<string[]> {
+    const response = await api.delete<string[]>(`/listings/${listingId}/images`, {
+      params: { imageUrl },
+    });
+    return response.data;
+  }
 }
 
 export default new ListingService();

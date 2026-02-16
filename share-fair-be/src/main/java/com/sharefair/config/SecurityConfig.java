@@ -40,6 +40,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/api/v1/users/**").permitAll()
                         .requestMatchers("/api/v1/auth/me").authenticated()
                         .requestMatchers(HttpMethod.POST, "/api/v1/listings").authenticated()
+                        .requestMatchers(HttpMethod.POST, "/api/v1/listings/*/images").authenticated()
                         .requestMatchers(HttpMethod.PUT, "/api/v1/listings/**").authenticated()
                         .requestMatchers(HttpMethod.DELETE, "/api/v1/listings/**").authenticated()
                         .requestMatchers(HttpMethod.PUT, "/api/v1/users/**").authenticated()

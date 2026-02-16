@@ -4,6 +4,7 @@ import { useNavigate, useParams } from 'react-router-dom'
 import { useAuth } from '../hooks/useAuth'
 import listingService from '../services/listingService'
 import LocationPicker from '../components/LocationPicker'
+import ImageUpload from '../components/ImageUpload'
 
 const CATEGORIES = ['Electronics', 'Sports & Outdoors', 'Tools', 'Furniture', 'Books', 'Clothing', 'Other']
 const CONDITIONS = ['EXCELLENT', 'GOOD', 'FAIR', 'POOR']
@@ -24,8 +25,9 @@ const EditListingPage = () => {
   const [neighborhood, setNeighborhood] = useState('')
   const [latitude, setLatitude] = useState(0)
   const [longitude, setLongitude] = useState(0)
-  const [imageUrls, setImageUrls] = useState<string[]>([''])
+  const [imageUrls, setImageUrls] = useState<string[]>([])
   const [loading, setLoading] = useState(true)
+  const [uploading, setUploading] = useState(false)
   const [saving, setSaving] = useState(false)
   const [errors, setErrors] = useState<Record<string, string>>({})
 
@@ -47,7 +49,7 @@ const EditListingPage = () => {
         setNeighborhood(listing.neighborhood || '')
         setLatitude(listing.latitude || 0)
         setLongitude(listing.longitude || 0)
-        setImageUrls(listing.images?.length ? listing.images : [''])
+        setImageUrls(listing.images?.length ? listing.images : [])
       })
       .catch(() => navigate('/'))
       .finally(() => setLoading(false))
@@ -78,7 +80,7 @@ const EditListingPage = () => {
         condition: condition as any,
         price: isFree ? 0 : parseFloat(price),
         pricePerDay: isFree ? 0 : (pricePerDay ? parseFloat(pricePerDay) : undefined),
-        images: imageUrls.filter((u) => u.trim()),
+        images: imageUrls,
         latitude,
         longitude,
         neighborhood: neighborhood.trim(),
@@ -93,20 +95,40 @@ const EditListingPage = () => {
     }
   }
 
-  const addImageUrl = () => {
-    if (imageUrls.length < 5) {
-      setImageUrls([...imageUrls, ''])
+  const handleFilesSelected = async (files: FileList) => {
+    if (!id) return
+    const fileArray = Array.from(files)
+    const allowedTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/gif']
+    const maxSize = 10 * 1024 * 1024
+    const remaining = 5 - imageUrls.length
+
+    const valid = fileArray
+      .filter(f => allowedTypes.includes(f.type) && f.size <= maxSize)
+      .slice(0, remaining)
+
+    if (valid.length === 0) return
+
+    setUploading(true)
+    try {
+      const urls = await listingService.uploadImages(id, valid)
+      setImageUrls(urls)
+    } catch {
+      setErrors({ form: t('listing.uploadFailed') })
+    } finally {
+      setUploading(false)
     }
   }
 
-  const removeImageUrl = (index: number) => {
-    setImageUrls(imageUrls.filter((_, i) => i !== index))
-  }
-
-  const updateImageUrl = (index: number, value: string) => {
-    const updated = [...imageUrls]
-    updated[index] = value
-    setImageUrls(updated)
+  const handleImageRemove = async (index: number) => {
+    if (!id) return
+    const url = imageUrls[index]
+    try {
+      const updated = await listingService.deleteImage(id, url)
+      setImageUrls(updated)
+    } catch {
+      // Fallback: remove locally
+      setImageUrls(prev => prev.filter((_, i) => i !== index))
+    }
   }
 
   const inputClass = (field: string) =>
@@ -262,56 +284,22 @@ const EditListingPage = () => {
           />
         </div>
 
-        {/* Image URLs */}
+        {/* Image Upload */}
         <div>
           <label className="block font-semibold mb-2">{t('listing.images')}</label>
-          <div className="space-y-3">
-            {imageUrls.map((url, index) => (
-              <div key={index} className="flex gap-2">
-                <input
-                  type="url"
-                  value={url}
-                  onChange={(e) => updateImageUrl(index, e.target.value)}
-                  placeholder={t('listing.addImageUrl')}
-                  className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
-                />
-                {imageUrls.length > 1 && (
-                  <button
-                    type="button"
-                    onClick={() => removeImageUrl(index)}
-                    className="px-3 py-2 text-red-600 hover:bg-red-50 rounded-lg"
-                  >
-                    {t('listing.removeImage')}
-                  </button>
-                )}
-              </div>
-            ))}
-            {imageUrls.length < 5 && (
-              <button
-                type="button"
-                onClick={addImageUrl}
-                className="text-sm text-primary hover:underline"
-              >
-                + {t('listing.addImageUrl')}
-              </button>
-            )}
-          </div>
-          {/* Image previews */}
-          {imageUrls.some((u) => u.trim()) && (
-            <div className="grid grid-cols-5 gap-2 mt-3">
-              {imageUrls.filter((u) => u.trim()).map((url, index) => (
-                <div key={index} className="aspect-square bg-gray-100 rounded overflow-hidden">
-                  <img src={url} alt={`Preview ${index + 1}`} className="w-full h-full object-cover" onError={(e) => { (e.target as HTMLImageElement).style.display = 'none' }} />
-                </div>
-              ))}
-            </div>
-          )}
+          <ImageUpload
+            images={imageUrls}
+            onChange={setImageUrls}
+            onFilesSelected={handleFilesSelected}
+            onRemove={handleImageRemove}
+            uploading={uploading}
+          />
         </div>
 
         <div className="flex gap-4">
           <button
             type="submit"
-            disabled={saving}
+            disabled={saving || uploading}
             className="flex-1 px-6 py-3 bg-primary text-white font-bold rounded-lg hover:bg-primary/90 disabled:opacity-50"
           >
             {saving ? t('common.loading') : t('common.save')}

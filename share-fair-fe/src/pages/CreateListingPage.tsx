@@ -1,8 +1,9 @@
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router-dom'
 import listingService from '../services/listingService'
 import LocationPicker from '../components/LocationPicker'
+import ImageUpload from '../components/ImageUpload'
 
 const CATEGORIES = ['Electronics', 'Sports & Outdoors', 'Tools', 'Furniture', 'Books', 'Clothing', 'Other']
 const CONDITIONS = ['EXCELLENT', 'GOOD', 'FAIR', 'POOR']
@@ -21,7 +22,8 @@ const CreateListingPage = () => {
   const [neighborhood, setNeighborhood] = useState('')
   const [latitude, setLatitude] = useState(0)
   const [longitude, setLongitude] = useState(0)
-  const [imageUrls, setImageUrls] = useState<string[]>([''])
+  const [imagePreviews, setImagePreviews] = useState<string[]>([])
+  const pendingFiles = useRef<File[]>([])
   const [saving, setSaving] = useState(false)
   const [errors, setErrors] = useState<Record<string, string>>({})
 
@@ -43,6 +45,7 @@ const CreateListingPage = () => {
     setSaving(true)
     try {
       const isFree = listingType === 'FREE'
+      // Create listing first (without images)
       const listing = await listingService.createListing({
         title: title.trim(),
         description: description.trim(),
@@ -51,19 +54,53 @@ const CreateListingPage = () => {
         ownerId: '',
         price: isFree ? 0 : parseFloat(price),
         pricePerDay: isFree ? 0 : (pricePerDay ? parseFloat(pricePerDay) : undefined),
-        images: imageUrls.filter((u) => u.trim()),
+        images: [],
         latitude,
         longitude,
         neighborhood: neighborhood.trim(),
         available: true,
         listingType,
       })
+
+      // Upload pending files to the new listing
+      if (pendingFiles.current.length > 0) {
+        await listingService.uploadImages(listing.id, pendingFiles.current)
+      }
+
       navigate(`/listing/${listing.id}`)
     } catch {
       setErrors({ form: t('validation.saveFailed') })
     } finally {
       setSaving(false)
     }
+  }
+
+  const handleImageChange = (urls: string[]) => {
+    setImagePreviews(urls)
+  }
+
+  const handleFilesSelected = (files: FileList | File[]) => {
+    const fileArray = Array.from(files)
+    const allowedTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/gif']
+    const maxSize = 10 * 1024 * 1024
+    const remaining = 5 - imagePreviews.length
+
+    const valid = fileArray
+      .filter(f => allowedTypes.includes(f.type) && f.size <= maxSize)
+      .slice(0, remaining)
+
+    if (valid.length === 0) return
+
+    const previews = valid.map(f => URL.createObjectURL(f))
+    setImagePreviews(prev => [...prev, ...previews])
+    pendingFiles.current.push(...valid)
+  }
+
+  const handleImageRemove = (index: number) => {
+    const url = imagePreviews[index]
+    if (url.startsWith('blob:')) URL.revokeObjectURL(url)
+    setImagePreviews(prev => prev.filter((_, i) => i !== index))
+    pendingFiles.current.splice(index, 1)
   }
 
   const inputClass = (field: string) =>
@@ -219,53 +256,15 @@ const CreateListingPage = () => {
           />
         </div>
 
-        {/* Image URLs */}
+        {/* Image Upload */}
         <div>
           <label className="block font-semibold mb-2">{t('listing.images')}</label>
-          <div className="space-y-3">
-            {imageUrls.map((url, index) => (
-              <div key={index} className="flex gap-2">
-                <input
-                  type="url"
-                  value={url}
-                  onChange={(e) => {
-                    const updated = [...imageUrls]
-                    updated[index] = e.target.value
-                    setImageUrls(updated)
-                  }}
-                  placeholder={t('listing.addImageUrl')}
-                  className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
-                />
-                {imageUrls.length > 1 && (
-                  <button
-                    type="button"
-                    onClick={() => setImageUrls(imageUrls.filter((_, i) => i !== index))}
-                    className="px-3 py-2 text-red-600 hover:bg-red-50 rounded-lg"
-                  >
-                    {t('listing.removeImage')}
-                  </button>
-                )}
-              </div>
-            ))}
-            {imageUrls.length < 5 && (
-              <button
-                type="button"
-                onClick={() => setImageUrls([...imageUrls, ''])}
-                className="text-sm text-primary hover:underline"
-              >
-                + {t('listing.addImageUrl')}
-              </button>
-            )}
-          </div>
-          {imageUrls.some((u) => u.trim()) && (
-            <div className="grid grid-cols-5 gap-2 mt-3">
-              {imageUrls.filter((u) => u.trim()).map((url, index) => (
-                <div key={index} className="aspect-square bg-gray-100 rounded overflow-hidden">
-                  <img src={url} alt={`Preview ${index + 1}`} className="w-full h-full object-cover" onError={(e) => { (e.target as HTMLImageElement).style.display = 'none' }} />
-                </div>
-              ))}
-            </div>
-          )}
+          <ImageUpload
+            images={imagePreviews}
+            onChange={handleImageChange}
+            onFilesSelected={handleFilesSelected}
+            onRemove={handleImageRemove}
+          />
         </div>
 
         {/* Submit */}

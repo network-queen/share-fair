@@ -22,6 +22,26 @@ services:
     networks:
       - sharefair-network
 
+  minio:
+    image: minio/minio:latest
+    container_name: sharefair-minio
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: sharefair
+      MINIO_ROOT_PASSWORD: sharefair123
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    volumes:
+      - minio_data:/data
+    healthcheck:
+      test: ["CMD", "mc", "ready", "local"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - sharefair-network
+
   ollama:
     image: ollama/ollama:latest
     container_name: sharefair-ollama
@@ -53,8 +73,14 @@ services:
       STRIPE_SECRET_KEY: ${STRIPE_SECRET_KEY:-}
       STRIPE_PUBLISHABLE_KEY: ${STRIPE_PUBLISHABLE_KEY:-}
       STRIPE_WEBHOOK_SECRET: ${STRIPE_WEBHOOK_SECRET:-}
+      MINIO_ENDPOINT: http://minio:9000
+      MINIO_ACCESS_KEY: sharefair
+      MINIO_SECRET_KEY: sharefair123
+      MINIO_BUCKET: sharefair-images
     depends_on:
       postgres:
+        condition: service_healthy
+      minio:
         condition: service_healthy
       ollama:
         condition: service_started
@@ -80,6 +106,8 @@ services:
 
 volumes:
   postgres_data:
+    driver: local
+  minio_data:
     driver: local
   ollama_data:
     driver: local
