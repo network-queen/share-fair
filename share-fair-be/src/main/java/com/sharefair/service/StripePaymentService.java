@@ -40,6 +40,10 @@ public class StripePaymentService implements PaymentService {
             throw new RuntimeException("Transaction is not in PENDING status");
         }
 
+        if (tx.getTotalAmount().compareTo(java.math.BigDecimal.ZERO) == 0) {
+            throw new RuntimeException("Payment is not required for free transactions");
+        }
+
         long amountInCents = tx.getTotalAmount().movePointRight(2).longValue();
 
         try {

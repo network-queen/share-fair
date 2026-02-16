@@ -70,11 +70,23 @@ public class TransactionService {
         long days = ChronoUnit.DAYS.between(request.getStartDate(), request.getEndDate());
         if (days < 1) days = 1;
 
-        BigDecimal pricePerDay = listing.getPricePerDay() != null ? listing.getPricePerDay() : listing.getPrice();
-        BigDecimal totalAmount = pricePerDay.multiply(BigDecimal.valueOf(days));
+        boolean isFree = "FREE".equals(listing.getListingType());
 
-        BigDecimal feePercentage = getActiveServiceFeePercentage();
-        BigDecimal serviceFee = totalAmount.multiply(feePercentage).divide(BigDecimal.valueOf(100), 2, RoundingMode.HALF_UP);
+        BigDecimal totalAmount;
+        BigDecimal serviceFee;
+        String paymentStatus;
+
+        if (isFree) {
+            totalAmount = BigDecimal.ZERO;
+            serviceFee = BigDecimal.ZERO;
+            paymentStatus = "NOT_REQUIRED";
+        } else {
+            BigDecimal pricePerDay = listing.getPricePerDay() != null ? listing.getPricePerDay() : listing.getPrice();
+            totalAmount = pricePerDay.multiply(BigDecimal.valueOf(days));
+            BigDecimal feePercentage = getActiveServiceFeePercentage();
+            serviceFee = totalAmount.multiply(feePercentage).divide(BigDecimal.valueOf(100), 2, RoundingMode.HALF_UP);
+            paymentStatus = "PENDING";
+        }
 
         Transaction transaction = Transaction.builder()
                 .listingId(listing.getId())
@@ -85,7 +97,7 @@ public class TransactionService {
                 .endDate(request.getEndDate())
                 .totalAmount(totalAmount)
                 .serviceFee(serviceFee)
-                .paymentStatus("PENDING")
+                .paymentStatus(paymentStatus)
                 .build();
 
         Transaction saved = transactionRepository.save(transaction);
@@ -175,8 +187,9 @@ public class TransactionService {
     }
 
     private TransactionDto enrichDto(Transaction tx) {
-        String listingTitle = listingRepository.findById(tx.getListingId())
-                .map(Listing::getTitle).orElse("Unknown Listing");
+        Listing listing = listingRepository.findById(tx.getListingId()).orElse(null);
+        String listingTitle = listing != null ? listing.getTitle() : "Unknown Listing";
+        boolean isFree = listing != null && "FREE".equals(listing.getListingType());
         String borrowerName = userRepository.findById(tx.getBorrowerId())
                 .map(User::getName).orElse("Unknown User");
         String ownerName = userRepository.findById(tx.getOwnerId())
@@ -198,6 +211,7 @@ public class TransactionService {
                 .paymentStatus(tx.getPaymentStatus())
                 .createdAt(tx.getCreatedAt())
                 .completedAt(tx.getCompletedAt())
+                .isFree(isFree)
                 .build();
     }
 

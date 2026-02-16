@@ -107,6 +107,7 @@ const ListingDetailPage = () => {
   }
 
   const isOwner = user?.id === currentListing.ownerId
+  const isFree = currentListing.listingType === 'FREE'
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
@@ -140,9 +141,15 @@ const ListingDetailPage = () => {
         </div>
 
         <div className="border-t border-b py-4">
-          <p className="text-3xl font-bold text-primary">${currentListing.price}</p>
-          {currentListing.pricePerDay && (
-            <p className="text-gray-600">${currentListing.pricePerDay} {t('listing.pricePerDay')}</p>
+          {currentListing.listingType === 'FREE' ? (
+            <p className="text-3xl font-bold text-green-600">{t('listing.free')}</p>
+          ) : (
+            <>
+              <p className="text-3xl font-bold text-primary">${currentListing.price}</p>
+              {currentListing.pricePerDay != null && currentListing.pricePerDay > 0 && (
+                <p className="text-gray-600">${currentListing.pricePerDay} {t('listing.pricePerDay')}</p>
+              )}
+            </>
           )}
         </div>
 
@@ -246,7 +253,7 @@ const ListingDetailPage = () => {
                 onClick={() => setShowRentForm(true)}
                 className="w-full px-6 py-3 bg-primary text-white font-bold rounded-lg hover:bg-primary/90"
               >
-                {t('listing.rent')}
+                {isFree ? t('listing.borrow') : t('listing.rent')}
               </button>
             ) : (
               <div className="bg-gray-50 p-4 rounded-lg space-y-4">
@@ -280,7 +287,7 @@ const ListingDetailPage = () => {
                     disabled={renting}
                     className="flex-1 px-6 py-3 bg-primary text-white font-bold rounded-lg hover:bg-primary/90 disabled:opacity-50"
                   >
-                    {renting ? t('common.loading') : t('transaction.confirmRent')}
+                    {renting ? t('common.loading') : (isFree ? t('transaction.confirmBorrow') : t('transaction.confirmRent'))}
                   </button>
                   <button
                     onClick={() => { setShowRentForm(false); setRentError('') }}

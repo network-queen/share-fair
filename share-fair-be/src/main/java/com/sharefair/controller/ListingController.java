@@ -78,6 +78,10 @@ public class ListingController {
         listing.setOwnerId(principal.getId());
         if (listing.getLatitude() == null) listing.setLatitude(0.0);
         if (listing.getLongitude() == null) listing.setLongitude(0.0);
+        if ("FREE".equals(listing.getListingType())) {
+            listing.setPrice(BigDecimal.ZERO);
+            listing.setPricePerDay(BigDecimal.ZERO);
+        }
         Listing saved = listingRepository.save(listing);
         searchService.generateEmbedding(saved.getId());
         return ResponseEntity.status(HttpStatus.CREATED)
@@ -168,6 +172,7 @@ public class ListingController {
         dto.setNeighborhood(listing.getNeighborhood());
         dto.setAvailable(listing.getAvailable());
         dto.setStatus(listing.getStatus());
+        dto.setListingType(listing.getListingType());
         dto.setCreatedAt(listing.getCreatedAt());
         dto.setUpdatedAt(listing.getUpdatedAt());
 
@@ -197,6 +202,7 @@ public class ListingController {
                 .neighborhood(dto.getNeighborhood())
                 .available(dto.getAvailable())
                 .status(dto.getStatus())
+                .listingType(dto.getListingType() != null ? dto.getListingType() : "RENTAL")
                 .createdAt(dto.getCreatedAt())
                 .updatedAt(dto.getUpdatedAt())
                 .build();

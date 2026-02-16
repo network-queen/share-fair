@@ -28,6 +28,7 @@ public class ListingDto {
     private String neighborhood;
     private Boolean available;
     private String status;
+    private String listingType;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
     private Double ratings;

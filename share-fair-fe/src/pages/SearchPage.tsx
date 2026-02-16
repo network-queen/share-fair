@@ -237,7 +237,9 @@ const SearchPage = () => {
                       {listing.description}
                     </p>
                     <div className="flex justify-between items-center">
-                      <span className="font-bold text-primary">${listing.price}</span>
+                      <span className={`font-bold ${listing.listingType === 'FREE' ? 'text-green-600' : 'text-primary'}`}>
+                        {listing.listingType === 'FREE' ? t('listing.free') : `$${listing.price}`}
+                      </span>
                       <div className="text-right">
                         <span className="text-sm text-gray-500">{listing.neighborhood}</span>
                         {listing.distanceKm != null && (

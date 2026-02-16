@@ -17,6 +17,7 @@ interface TransactionData {
   paymentStatus: string;
   createdAt: string;
   completedAt?: string;
+  isFree?: boolean;
 }
 
 interface TransactionState {

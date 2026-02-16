@@ -43,6 +43,7 @@ export interface Listing {
   neighborhood: string;
   available: boolean;
   status?: string;
+  listingType?: string;
   createdAt: string;
   updatedAt: string;
   ratings?: number;
@@ -66,6 +67,7 @@ export interface Transaction {
   paymentStatus: PaymentStatus;
   createdAt: string;
   completedAt?: string;
+  isFree?: boolean;
 }
 
 // Review Types

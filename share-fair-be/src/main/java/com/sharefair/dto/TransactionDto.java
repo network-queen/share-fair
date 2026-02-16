@@ -29,4 +29,5 @@ public class TransactionDto {
     private String paymentStatus;
     private LocalDateTime createdAt;
     private LocalDateTime completedAt;
+    private Boolean isFree;
 }

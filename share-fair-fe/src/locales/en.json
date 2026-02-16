@@ -83,7 +83,11 @@
     "addImageUrl": "Add image URL",
     "removeImage": "Remove",
     "statusActive": "Active",
-    "statusArchived": "Archived"
+    "statusArchived": "Archived",
+    "listingType": "Listing Type",
+    "typeFree": "Free to Borrow",
+    "typeRental": "For Rent",
+    "free": "Free"
   },
   "profile": {
     "title": "My Profile",
@@ -122,6 +126,9 @@
     "viewListing": "View Listing",
     "notFound": "Transaction not found",
     "confirmRent": "Confirm Rental",
+    "confirmBorrow": "Confirm Borrow",
+    "freeTransaction": "Free — No Payment Required",
+    "waitingOwnerApproval": "Waiting for owner approval",
     "loginToRent": "Login to Rent",
     "datesRequired": "Please select both start and end dates",
     "endAfterStart": "End date must be after start date",
@@ -140,6 +147,7 @@
   "validation": {
     "required": "This field is required",
     "pricePositive": "Price must be greater than 0",
+    "priceRequiredForRental": "Price is required for rental listings",
     "saveFailed": "Failed to save. Please try again."
   },
   "home": {

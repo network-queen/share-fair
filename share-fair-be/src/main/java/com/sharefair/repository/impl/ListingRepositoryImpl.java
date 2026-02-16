@@ -39,6 +39,7 @@ public class ListingRepositoryImpl implements ListingRepository {
             DSL.field("neighborhood"),
             DSL.field("available"),
             DSL.field("status"),
+            DSL.field("listing_type"),
             DSL.field("created_at"),
             DSL.field("updated_at")
     };
@@ -56,6 +57,9 @@ public class ListingRepositoryImpl implements ListingRepository {
         listing.setUpdatedAt(LocalDateTime.now());
         if (listing.getStatus() == null) {
             listing.setStatus("ACTIVE");
+        }
+        if (listing.getListingType() == null) {
+            listing.setListingType("RENTAL");
         }
 
         dsl.insertInto(DSL.table(TABLE))
@@ -75,6 +79,7 @@ public class ListingRepositoryImpl implements ListingRepository {
                         listing.getNeighborhood(),
                         listing.getAvailable(),
                         listing.getStatus(),
+                        listing.getListingType(),
                         listing.getCreatedAt(),
                         listing.getUpdatedAt()
                 )
@@ -100,6 +105,7 @@ public class ListingRepositoryImpl implements ListingRepository {
                 .set(DSL.field("neighborhood"), listing.getNeighborhood())
                 .set(DSL.field("available"), listing.getAvailable())
                 .set(DSL.field("status"), listing.getStatus())
+                .set(DSL.field("listing_type"), listing.getListingType())
                 .set(DSL.field("updated_at"), listing.getUpdatedAt())
                 .where(DSL.field("id").eq(UUID.fromString(listing.getId())))
                 .execute();
@@ -361,6 +367,7 @@ public class ListingRepositoryImpl implements ListingRepository {
                 .neighborhood(record.get(DSL.field("neighborhood"), String.class))
                 .available(record.get(DSL.field("available"), Boolean.class))
                 .status(record.get(DSL.field("status"), String.class))
+                .listingType(record.get(DSL.field("listing_type"), String.class))
                 .createdAt(toLocalDateTime(record.get(DSL.field("created_at"))))
                 .updatedAt(toLocalDateTime(record.get(DSL.field("updated_at"))))
                 .build();

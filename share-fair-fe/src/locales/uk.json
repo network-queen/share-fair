@@ -83,7 +83,11 @@
     "addImageUrl": "Додати URL зображення",
     "removeImage": "Видалити",
     "statusActive": "Активне",
-    "statusArchived": "Архівоване"
+    "statusArchived": "Архівоване",
+    "listingType": "Тип оголошення",
+    "typeFree": "Безкоштовно",
+    "typeRental": "Оренда",
+    "free": "Безкоштовно"
   },
   "profile": {
     "title": "Мій профіль",
@@ -122,6 +126,9 @@
     "viewListing": "Переглянути оголошення",
     "notFound": "Операцію не знайдено",
     "confirmRent": "Підтвердити оренду",
+    "confirmBorrow": "Підтвердити позику",
+    "freeTransaction": "Безкоштовно — оплата не потрібна",
+    "waitingOwnerApproval": "Очікування підтвердження від власника",
     "loginToRent": "Увійдіть для оренди",
     "datesRequired": "Будь ласка, оберіть обидві дати",
     "endAfterStart": "Дата закінчення має бути після дати початку",
@@ -140,6 +147,7 @@
   "validation": {
     "required": "Це поле обов'язкове",
     "pricePositive": "Ціна має бути більше 0",
+    "priceRequiredForRental": "Ціна обов'язкова для оголошень оренди",
     "saveFailed": "Не вдалося зберегти. Спробуйте ще раз."
   },
   "home": {

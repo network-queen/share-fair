@@ -290,7 +290,9 @@ const ProfilePage = () => {
                     </div>
                     <div className="p-4">
                       <h3 className="font-semibold text-lg">{listing.title}</h3>
-                      <p className="text-primary font-bold">${listing.pricePerDay || listing.price}/{t('transaction.day')}</p>
+                      <p className={`font-bold ${listing.listingType === 'FREE' ? 'text-green-600' : 'text-primary'}`}>
+                        {listing.listingType === 'FREE' ? t('listing.free') : `$${listing.pricePerDay || listing.price}/${t('transaction.day')}`}
+                      </p>
                       <span className={`inline-block mt-2 px-2 py-1 text-xs rounded ${listing.available ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-600'}`}>
                         {listing.available ? t('listing.available') : t('listing.unavailable')}
                       </span>
@@ -324,7 +326,9 @@ const ProfilePage = () => {
                         </p>
                       </div>
                       <div className="text-right">
-                        <p className="font-bold">${tx.totalAmount}</p>
+                        <p className={`font-bold ${tx.isFree ? 'text-green-600' : ''}`}>
+                          {tx.isFree ? t('listing.free') : `$${tx.totalAmount}`}
+                        </p>
                         <span className={`inline-block px-2 py-1 text-xs rounded ${getStatusColor(tx.status)}`}>
                           {t(`transaction.status.${tx.status}`)}
                         </span>

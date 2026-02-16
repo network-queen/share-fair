@@ -28,6 +28,8 @@ public class Listing {
     private String neighborhood;
     private Boolean available;
     private String status;
+    @Builder.Default
+    private String listingType = "RENTAL";
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
     @Builder.Default

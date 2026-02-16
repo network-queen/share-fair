@@ -16,6 +16,7 @@ export interface TransactionResponse {
   paymentStatus: string;
   createdAt: string;
   completedAt?: string;
+  isFree?: boolean;
 }
 
 class TransactionService {

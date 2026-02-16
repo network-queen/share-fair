@@ -18,6 +18,7 @@ const EditListingPage = () => {
   const [description, setDescription] = useState('')
   const [category, setCategory] = useState('')
   const [condition, setCondition] = useState('')
+  const [listingType, setListingType] = useState<'RENTAL' | 'FREE'>('RENTAL')
   const [price, setPrice] = useState('')
   const [pricePerDay, setPricePerDay] = useState('')
   const [neighborhood, setNeighborhood] = useState('')
@@ -40,6 +41,7 @@ const EditListingPage = () => {
         setDescription(listing.description)
         setCategory(listing.category)
         setCondition(listing.condition)
+        setListingType(listing.listingType === 'FREE' ? 'FREE' : 'RENTAL')
         setPrice(String(listing.price))
         setPricePerDay(listing.pricePerDay ? String(listing.pricePerDay) : '')
         setNeighborhood(listing.neighborhood || '')
@@ -57,7 +59,7 @@ const EditListingPage = () => {
     if (!description.trim()) newErrors.description = t('validation.required')
     if (!category) newErrors.category = t('validation.required')
     if (!condition) newErrors.condition = t('validation.required')
-    if (!price || parseFloat(price) <= 0) newErrors.price = t('validation.pricePositive')
+    if (listingType === 'RENTAL' && (!price || parseFloat(price) <= 0)) newErrors.price = t('validation.priceRequiredForRental')
     setErrors(newErrors)
     return Object.keys(newErrors).length === 0
   }
@@ -68,18 +70,20 @@ const EditListingPage = () => {
 
     setSaving(true)
     try {
+      const isFree = listingType === 'FREE'
       await listingService.updateListing(id, {
         title: title.trim(),
         description: description.trim(),
         category,
         condition: condition as any,
-        price: parseFloat(price),
-        pricePerDay: pricePerDay ? parseFloat(pricePerDay) : undefined,
+        price: isFree ? 0 : parseFloat(price),
+        pricePerDay: isFree ? 0 : (pricePerDay ? parseFloat(pricePerDay) : undefined),
         images: imageUrls.filter((u) => u.trim()),
         latitude,
         longitude,
         neighborhood: neighborhood.trim(),
         available: true,
+        listingType,
       })
       navigate(`/listing/${id}`)
     } catch {
@@ -178,33 +182,65 @@ const EditListingPage = () => {
           </div>
         </div>
 
-        <div className="grid grid-cols-2 gap-6">
-          <div>
-            <label className="block font-semibold mb-2">{t('listing.price')}</label>
-            <input
-              type="number"
-              step="0.01"
-              min="0"
-              value={price}
-              onChange={(e) => setPrice(e.target.value)}
-              placeholder={t('listing.pricePlaceholder')}
-              className={inputClass('price')}
-            />
-            {errors.price && <p className="text-red-500 text-sm mt-1">{errors.price}</p>}
-          </div>
-          <div>
-            <label className="block font-semibold mb-2">{t('listing.pricePerDay')}</label>
-            <input
-              type="number"
-              step="0.01"
-              min="0"
-              value={pricePerDay}
-              onChange={(e) => setPricePerDay(e.target.value)}
-              placeholder={t('listing.pricePerDayPlaceholder')}
-              className={inputClass('pricePerDay')}
-            />
+        {/* Listing Type */}
+        <div>
+          <label className="block font-semibold mb-2">{t('listing.listingType')}</label>
+          <div className="flex gap-4">
+            <label className="flex items-center gap-2 cursor-pointer">
+              <input
+                type="radio"
+                name="listingType"
+                value="RENTAL"
+                checked={listingType === 'RENTAL'}
+                onChange={() => setListingType('RENTAL')}
+                className="text-primary focus:ring-primary"
+              />
+              <span>{t('listing.typeRental')}</span>
+            </label>
+            <label className="flex items-center gap-2 cursor-pointer">
+              <input
+                type="radio"
+                name="listingType"
+                value="FREE"
+                checked={listingType === 'FREE'}
+                onChange={() => setListingType('FREE')}
+                className="text-primary focus:ring-primary"
+              />
+              <span>{t('listing.typeFree')}</span>
+            </label>
           </div>
         </div>
+
+        {/* Pricing (hidden for FREE listings) */}
+        {listingType === 'RENTAL' && (
+          <div className="grid grid-cols-2 gap-6">
+            <div>
+              <label className="block font-semibold mb-2">{t('listing.price')}</label>
+              <input
+                type="number"
+                step="0.01"
+                min="0"
+                value={price}
+                onChange={(e) => setPrice(e.target.value)}
+                placeholder={t('listing.pricePlaceholder')}
+                className={inputClass('price')}
+              />
+              {errors.price && <p className="text-red-500 text-sm mt-1">{errors.price}</p>}
+            </div>
+            <div>
+              <label className="block font-semibold mb-2">{t('listing.pricePerDay')}</label>
+              <input
+                type="number"
+                step="0.01"
+                min="0"
+                value={pricePerDay}
+                onChange={(e) => setPricePerDay(e.target.value)}
+                placeholder={t('listing.pricePerDayPlaceholder')}
+                className={inputClass('pricePerDay')}
+              />
+            </div>
+          </div>
+        )}
 
         <div>
           <label className="block font-semibold mb-2">{t('search.neighborhood')}</label>

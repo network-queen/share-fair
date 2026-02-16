@@ -127,16 +127,22 @@ const TransactionDetailPage = () => {
           </div>
           <div>
             <p className="text-sm text-gray-500">{t('transaction.totalAmount')}</p>
-            <p className="font-semibold text-lg">${tx.totalAmount}</p>
+            <p className="font-semibold text-lg">
+              {tx.isFree ? <span className="text-green-600">{t('listing.free')}</span> : `$${tx.totalAmount}`}
+            </p>
           </div>
-          <div>
-            <p className="text-sm text-gray-500">{t('transaction.serviceFee')}</p>
-            <p className="font-semibold">${tx.serviceFee}</p>
-          </div>
-          <div>
-            <p className="text-sm text-gray-500">{t('transaction.paymentStatus')}</p>
-            <p className="font-semibold">{tx.paymentStatus}</p>
-          </div>
+          {!tx.isFree && (
+            <div>
+              <p className="text-sm text-gray-500">{t('transaction.serviceFee')}</p>
+              <p className="font-semibold">${tx.serviceFee}</p>
+            </div>
+          )}
+          {!tx.isFree && (
+            <div>
+              <p className="text-sm text-gray-500">{t('transaction.paymentStatus')}</p>
+              <p className="font-semibold">{tx.paymentStatus}</p>
+            </div>
+          )}
           <div>
             <p className="text-sm text-gray-500">{t('transaction.createdAt')}</p>
             <p className="font-semibold">{tx.createdAt ? new Date(tx.createdAt).toLocaleDateString() : '-'}</p>
@@ -149,8 +155,18 @@ const TransactionDetailPage = () => {
           )}
         </div>
 
-        {/* Payment Section */}
-        {tx.status === 'PENDING' && isBorrower && !showPayment && (
+        {/* Free Transaction Info */}
+        {tx.isFree && tx.status === 'PENDING' && (
+          <div className="border-t pt-6">
+            <div className="bg-green-50 border border-green-200 p-4 rounded-lg">
+              <p className="font-semibold text-green-800">{t('transaction.freeTransaction')}</p>
+              <p className="text-sm text-green-700 mt-1">{t('transaction.waitingOwnerApproval')}</p>
+            </div>
+          </div>
+        )}
+
+        {/* Payment Section (only for paid transactions) */}
+        {!tx.isFree && tx.status === 'PENDING' && isBorrower && !showPayment && (
           <div className="border-t pt-6">
             <button
               onClick={() => setShowPayment(true)}
@@ -161,7 +177,7 @@ const TransactionDetailPage = () => {
           </div>
         )}
 
-        {showPayment && id && (
+        {!tx.isFree && showPayment && id && (
           <div className="border-t pt-6 space-y-3">
             {paymentError && (
               <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded text-sm">
