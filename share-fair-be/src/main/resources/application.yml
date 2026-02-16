@@ -28,6 +28,24 @@ spring:
     baseline-on-migrate: true
     enabled: true
 
+  mail:
+    host: ${MAIL_HOST:smtp.gmail.com}
+    port: ${MAIL_PORT:587}
+    username: ${MAIL_USERNAME:}
+    password: ${MAIL_PASSWORD:}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+
+  thymeleaf:
+    prefix: classpath:/templates/
+    suffix: .html
+    mode: HTML
+    check-template-location: false
+
 server:
   port: 8080
   servlet:
@@ -63,3 +81,5 @@ stripe:
 sharefair:
   embedding:
     similarity-threshold: ${EMBEDDING_SIMILARITY_THRESHOLD:0.8}
+  email:
+    enabled: ${EMAIL_ENABLED:false}

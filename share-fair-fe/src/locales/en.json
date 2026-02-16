@@ -48,7 +48,11 @@
     "nearMe": "Near Me",
     "mapView": "Map View",
     "listView": "List View",
-    "locationError": "Could not get your location"
+    "locationError": "Could not get your location",
+    "recentSearches": "Recent Searches",
+    "clearRecent": "Clear",
+    "saveSearch": "Save Search",
+    "savedSearches": "Saved Searches"
   },
   "listing": {
     "title": "Listings",
@@ -251,6 +255,16 @@
     "markAllRead": "Mark all as read",
     "noNotifications": "No notifications yet",
     "justNow": "Just now"
+  },
+  "notificationPrefs": {
+    "title": "Notification Preferences",
+    "email": "Email Notifications",
+    "inApp": "In-App Notifications",
+    "emailTransactions": "Transaction updates",
+    "emailReviews": "New reviews received",
+    "emailMarketing": "Tips and community news",
+    "inAppTransactions": "Transaction updates",
+    "inAppReviews": "New reviews received"
   },
   "error": {
     "pageNotFound": "Page not found",

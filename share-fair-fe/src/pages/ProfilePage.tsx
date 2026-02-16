@@ -13,6 +13,7 @@ import ReviewList from '../components/ReviewList'
 import TrustBadge from '../components/TrustBadge'
 import type { TransactionResponse } from '../services/transactionService'
 import type { ReviewResponse } from '../services/reviewService'
+import NotificationPreferences from '../components/NotificationPreferences'
 import type { Listing, TrustScore, CarbonSavedRecord } from '../types'
 
 const ProfilePage = () => {
@@ -20,7 +21,7 @@ const ProfilePage = () => {
   const { user } = useAuth()
   const dispatch = useAppDispatch()
 
-  const [activeTab, setActiveTab] = useState<'listings' | 'transactions' | 'reviews' | 'carbon'>('listings')
+  const [activeTab, setActiveTab] = useState<'listings' | 'transactions' | 'reviews' | 'carbon' | 'settings'>('listings')
   const [listings, setListings] = useState<Listing[]>([])
   const [transactions, setTransactions] = useState<TransactionResponse[]>([])
   const [reviews, setReviews] = useState<ReviewResponse[]>([])
@@ -285,6 +286,12 @@ const ProfilePage = () => {
           >
             {t('carbon.history')}
           </button>
+          <button
+            onClick={() => setActiveTab('settings')}
+            className={`px-6 py-3 font-semibold ${activeTab === 'settings' ? 'border-b-2 border-primary text-primary' : 'text-gray-500 hover:text-gray-700'}`}
+          >
+            {t('common.settings')}
+          </button>
         </div>
 
         {activeTab === 'listings' && (
@@ -392,6 +399,10 @@ const ProfilePage = () => {
               </div>
             )}
           </div>
+        )}
+
+        {activeTab === 'settings' && (
+          <NotificationPreferences />
         )}
       </div>
     </div>

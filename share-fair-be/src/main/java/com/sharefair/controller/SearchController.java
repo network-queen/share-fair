@@ -46,7 +46,7 @@ public class SearchController {
             double radiusKm = radius != null ? radius : 10;
             listings = searchService.searchByLocation(lat, lng, radiusKm, limit, offset);
         } else {
-            listings = searchService.semanticSearch(query, neighborhood, category, limit, offset);
+            listings = searchService.semanticSearch(query, neighborhood, category, sortBy, limit, offset);
         }
 
         List<ListingDto> dtos = listings.stream()

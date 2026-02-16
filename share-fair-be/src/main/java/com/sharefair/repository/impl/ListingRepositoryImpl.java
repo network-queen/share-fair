@@ -233,7 +233,7 @@ public class ListingRepositoryImpl implements ListingRepository {
 
     @Override
     public List<Listing> findByKeyword(String query, String neighborhood,
-                                        String category, int limit, int offset) {
+                                        String category, String sortBy, int limit, int offset) {
         String pattern = "%" + query.toLowerCase() + "%";
 
         List<Condition> conditions = new ArrayList<>();
@@ -253,7 +253,7 @@ public class ListingRepositoryImpl implements ListingRepository {
         return dsl.select(LISTING_FIELDS)
                 .from(DSL.table(TABLE))
                 .where(conditions)
-                .orderBy(DSL.field("created_at").desc())
+                .orderBy(getSortField(sortBy))
                 .limit(limit)
                 .offset(offset)
                 .fetch()
@@ -262,7 +262,7 @@ public class ListingRepositoryImpl implements ListingRepository {
 
     @Override
     public List<Listing> findByFilters(String neighborhood, String category,
-                                        int limit, int offset) {
+                                        String sortBy, int limit, int offset) {
         List<Condition> conditions = new ArrayList<>();
         conditions.add(DSL.field("available").eq(true));
 
@@ -276,11 +276,20 @@ public class ListingRepositoryImpl implements ListingRepository {
         return dsl.select(LISTING_FIELDS)
                 .from(DSL.table(TABLE))
                 .where(conditions)
-                .orderBy(DSL.field("created_at").desc())
+                .orderBy(getSortField(sortBy))
                 .limit(limit)
                 .offset(offset)
                 .fetch()
                 .map(this::mapToListing);
+    }
+
+    private org.jooq.SortField<?> getSortField(String sortBy) {
+        if ("price".equals(sortBy)) {
+            return DSL.field("price").asc();
+        } else if ("date".equals(sortBy)) {
+            return DSL.field("created_at").desc();
+        }
+        return DSL.field("created_at").desc();
     }
 
     @Override

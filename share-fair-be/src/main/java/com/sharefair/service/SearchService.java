@@ -30,9 +30,14 @@ public class SearchService {
     }
 
     public List<Listing> semanticSearch(String query, String neighborhood,
-                                         String category, int limit, int offset) {
+                                         String category, String sortBy, int limit, int offset) {
         if (query == null || query.isBlank()) {
-            return listingRepository.findByFilters(neighborhood, category, limit, offset);
+            return listingRepository.findByFilters(neighborhood, category, sortBy, limit, offset);
+        }
+
+        // For price/date sorting, use keyword search (can't combine with vector similarity ordering)
+        if ("price".equals(sortBy) || "date".equals(sortBy)) {
+            return listingRepository.findByKeyword(query, neighborhood, category, sortBy, limit, offset);
         }
 
         try {
@@ -48,7 +53,7 @@ public class SearchService {
         } catch (Exception e) {
             log.warn("Embedding generation failed for query '{}', falling back to keyword search: {}",
                     query, e.getMessage());
-            return listingRepository.findByKeyword(query, neighborhood, category, limit, offset);
+            return listingRepository.findByKeyword(query, neighborhood, category, sortBy, limit, offset);
         }
     }
 

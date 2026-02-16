@@ -21,9 +21,9 @@ public interface ListingRepository {
                                     String category, double similarityThreshold,
                                     int limit, int offset);
     List<Listing> findByKeyword(String query, String neighborhood,
-                                 String category, int limit, int offset);
+                                 String category, String sortBy, int limit, int offset);
     List<Listing> findByFilters(String neighborhood, String category,
-                                 int limit, int offset);
+                                 String sortBy, int limit, int offset);
     void updateEmbedding(String listingId, float[] embedding);
     List<Listing> findWithoutEmbedding(int limit);
     List<Listing> findByLocation(double lat, double lng, double radiusKm, int limit, int offset);

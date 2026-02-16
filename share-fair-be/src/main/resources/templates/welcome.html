@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+</head>
+<body style="margin:0;padding:0;background-color:#f3f4f6;font-family:Arial,Helvetica,sans-serif;">
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:#f3f4f6;padding:40px 0;">
+    <tr>
+        <td align="center">
+            <table role="presentation" width="600" cellpadding="0" cellspacing="0" style="background-color:#ffffff;border-radius:8px;overflow:hidden;">
+                <!-- Header -->
+                <tr>
+                    <td style="background-color:#6366f1;padding:32px;text-align:center;">
+                        <h1 style="color:#ffffff;margin:0;font-size:28px;">ShareFair</h1>
+                    </td>
+                </tr>
+                <!-- Body -->
+                <tr>
+                    <td style="padding:32px;">
+                        <h2 style="color:#1f2937;margin:0 0 16px;">Welcome, <span th:text="${userName}">User</span>!</h2>
+                        <p style="color:#4b5563;line-height:1.6;margin:0 0 16px;">
+                            Thank you for joining ShareFair — the community marketplace for sharing, renting, and borrowing items locally.
+                        </p>
+                        <p style="color:#4b5563;line-height:1.6;margin:0 0 24px;">
+                            Here's what you can do:
+                        </p>
+                        <ul style="color:#4b5563;line-height:1.8;margin:0 0 24px;padding-left:20px;">
+                            <li>Browse items shared by your neighbors</li>
+                            <li>List your own items for rent or free borrowing</li>
+                            <li>Track your carbon savings and environmental impact</li>
+                            <li>Build trust through reviews and ratings</li>
+                        </ul>
+                        <div style="text-align:center;margin:24px 0;">
+                            <a th:href="${frontendUrl}" style="display:inline-block;padding:14px 32px;background-color:#6366f1;color:#ffffff;text-decoration:none;border-radius:6px;font-weight:bold;">
+                                Start Exploring
+                            </a>
+                        </div>
+                    </td>
+                </tr>
+                <!-- Footer -->
+                <tr>
+                    <td style="background-color:#f9fafb;padding:24px;text-align:center;border-top:1px solid #e5e7eb;">
+                        <p style="color:#9ca3af;font-size:12px;margin:0;">
+                            ShareFair — Share. Borrow. Save the planet.
+                        </p>
+                    </td>
+                </tr>
+            </table>
+        </td>
+    </tr>
+</table>
+</body>
+</html>

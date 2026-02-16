@@ -2,9 +2,13 @@ import { useState, useCallback, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useSearch } from '../hooks/useSearch'
 import { useGeolocation } from '../hooks/useGeolocation'
+import { useRecentSearches } from '../hooks/useRecentSearches'
+import { useSavedSearches } from '../hooks/useSavedSearches'
 import { Link } from 'react-router-dom'
 import ListingMap from '../components/ListingMap'
 import ListingCardSkeleton from '../components/ListingCardSkeleton'
+import HighlightText from '../components/HighlightText'
+import type { SearchParams } from '../types'
 
 const SearchPage = () => {
   const { t } = useTranslation()
@@ -21,12 +25,17 @@ const SearchPage = () => {
   } = useSearch()
 
   const { latitude, longitude, isLoading: geoLoading, error: geoError, requestLocation } = useGeolocation()
+  const { recentSearches, addSearch, removeSearch: removeRecent, clearAll: clearRecent } = useRecentSearches()
+  const { savedSearches, saveSearch, removeSearch: removeSaved } = useSavedSearches()
 
   const [query, setQuery] = useState('')
   const [neighborhood, setNeighborhood] = useState('')
   const [category, setCategory] = useState('')
   const [sortBy, setSortBy] = useState<'relevance' | 'distance' | 'price' | 'date'>('relevance')
   const [viewMode, setViewMode] = useState<'grid' | 'map'>('grid')
+  const [activeQuery, setActiveQuery] = useState('')
+  const [showRecent, setShowRecent] = useState(false)
+  const [showSaved, setShowSaved] = useState(false)
 
   const searchWith = useCallback((overrides: Record<string, string | number | undefined>) => {
     const params = {
@@ -39,10 +48,37 @@ const SearchPage = () => {
     performSearch(params)
   }, [query, neighborhood, category, sortBy, performSearch])
 
-  const handleSearch = () => searchWith({})
+  const handleSearch = () => {
+    if (query.trim()) addSearch(query.trim())
+    setActiveQuery(query)
+    setShowRecent(false)
+    searchWith({})
+  }
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter') handleSearch()
+  }
+
+  const handleRecentClick = (q: string) => {
+    setQuery(q)
+    setActiveQuery(q)
+    setShowRecent(false)
+    searchWith({ query: q })
+  }
+
+  const handleSavedClick = (params: SearchParams) => {
+    setQuery(params.query || '')
+    setNeighborhood(params.neighborhood || '')
+    setCategory(params.category || '')
+    setSortBy(params.sortBy || 'relevance')
+    setActiveQuery(params.query || '')
+    setShowSaved(false)
+    performSearch(params)
+  }
+
+  const handleSaveCurrentSearch = () => {
+    const name = query || `${neighborhood || t('search.allNeighborhoods')} / ${category || t('search.allCategories')}`
+    saveSearch(name, { query: query || undefined, neighborhood: neighborhood || undefined, category: category || undefined, sortBy })
   }
 
   const handleNeighborhoodChange = (value: string) => {
@@ -83,15 +119,36 @@ const SearchPage = () => {
         <h3 className="font-bold text-lg mb-4">{t('search.title')}</h3>
 
         {/* Search Query */}
-        <div className="mb-4">
+        <div className="mb-4 relative">
           <input
             type="text"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             onKeyDown={handleKeyDown}
+            onFocus={() => setShowRecent(true)}
+            onBlur={() => setTimeout(() => setShowRecent(false), 200)}
             placeholder={t('search.placeholder')}
             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
           />
+          {/* Recent Searches Dropdown */}
+          {showRecent && recentSearches.length > 0 && !query && (
+            <div className="absolute z-10 w-full mt-1 bg-white border border-gray-200 rounded-md shadow-lg max-h-48 overflow-auto">
+              <div className="flex justify-between items-center px-3 py-2 border-b">
+                <span className="text-xs text-gray-500 font-medium">{t('search.recentSearches')}</span>
+                <button onClick={clearRecent} className="text-xs text-red-500 hover:underline">{t('search.clearRecent')}</button>
+              </div>
+              {recentSearches.map((q) => (
+                <div key={q} className="flex items-center justify-between px-3 py-2 hover:bg-gray-50 cursor-pointer">
+                  <button onClick={() => handleRecentClick(q)} className="flex-1 text-left text-sm text-gray-700 truncate">
+                    {q}
+                  </button>
+                  <button onClick={() => removeRecent(q)} className="ml-2 text-gray-400 hover:text-red-500 text-xs">
+                    &times;
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
 
         {/* Near Me Button */}
@@ -172,11 +229,46 @@ const SearchPage = () => {
           {isLoading ? t('common.loading') : t('search.searchButton')}
         </button>
 
+        {/* Save Search */}
+        <button
+          onClick={handleSaveCurrentSearch}
+          className="w-full mt-2 px-4 py-2 text-sm text-primary border border-primary rounded-md hover:bg-primary/5"
+        >
+          {t('search.saveSearch')}
+        </button>
+
         {/* Results Count */}
         {total > 0 && (
           <p className="text-sm text-gray-500 mt-3">
             {t('search.resultsFound', { count: total })}
           </p>
+        )}
+
+        {/* Saved Searches */}
+        {savedSearches.length > 0 && (
+          <div className="mt-4 pt-4 border-t">
+            <button
+              onClick={() => setShowSaved(!showSaved)}
+              className="flex items-center justify-between w-full text-sm font-medium text-gray-700"
+            >
+              {t('search.savedSearches')} ({savedSearches.length})
+              <span className={`transform transition-transform ${showSaved ? 'rotate-180' : ''}`}>&#9660;</span>
+            </button>
+            {showSaved && (
+              <div className="mt-2 space-y-1">
+                {savedSearches.map((s) => (
+                  <div key={s.id} className="flex items-center justify-between py-1">
+                    <button onClick={() => handleSavedClick(s.params)} className="text-sm text-primary hover:underline truncate flex-1 text-left">
+                      {s.name}
+                    </button>
+                    <button onClick={() => removeSaved(s.id)} className="ml-2 text-gray-400 hover:text-red-500 text-xs">
+                      &times;
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
         )}
       </aside>
 
@@ -232,9 +324,11 @@ const SearchPage = () => {
                     )}
                   </div>
                   <div className="p-4">
-                    <h3 className="font-bold text-lg mb-2">{listing.title}</h3>
+                    <h3 className="font-bold text-lg mb-2">
+                      <HighlightText text={listing.title} highlight={activeQuery} />
+                    </h3>
                     <p className="text-gray-600 text-sm mb-3 line-clamp-2">
-                      {listing.description}
+                      <HighlightText text={listing.description} highlight={activeQuery} />
                     </p>
                     <div className="flex justify-between items-center">
                       <span className={`font-bold ${listing.listingType === 'FREE' ? 'text-green-600' : 'text-primary'}`}>

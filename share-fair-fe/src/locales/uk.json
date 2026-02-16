@@ -48,7 +48,11 @@
     "nearMe": "Поруч зі мною",
     "mapView": "Карта",
     "listView": "Список",
-    "locationError": "Не вдалося визначити місцезнаходження"
+    "locationError": "Не вдалося визначити місцезнаходження",
+    "recentSearches": "Нещодавні пошуки",
+    "clearRecent": "Очистити",
+    "saveSearch": "Зберегти пошук",
+    "savedSearches": "Збережені пошуки"
   },
   "listing": {
     "title": "Оголошення",
@@ -251,6 +255,16 @@
     "markAllRead": "Позначити все як прочитане",
     "noNotifications": "Сповіщень ще немає",
     "justNow": "Щойно"
+  },
+  "notificationPrefs": {
+    "title": "Налаштування сповіщень",
+    "email": "Сповіщення на пошту",
+    "inApp": "Сповіщення в додатку",
+    "emailTransactions": "Оновлення операцій",
+    "emailReviews": "Нові отримані відгуки",
+    "emailMarketing": "Поради та новини спільноти",
+    "inAppTransactions": "Оновлення операцій",
+    "inAppReviews": "Нові отримані відгуки"
   },
   "error": {
     "pageNotFound": "Сторінку не знайдено",
