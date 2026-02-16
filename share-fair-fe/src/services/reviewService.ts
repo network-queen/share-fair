@@ -39,7 +39,12 @@ class ReviewService {
 
   async checkReviewForTransaction(transactionId: string): Promise<ReviewResponse | null> {
     const response = await api.get<ReviewResponse | null>(`/reviews/transaction/${transactionId}/check`);
-    return response.data;
+    const data = response.data;
+    // ApiResponse with null data may not be unwrapped by interceptor (NON_NULL serialization)
+    if (data && typeof data === 'object' && 'id' in data) {
+      return data;
+    }
+    return null;
   }
 }
 
