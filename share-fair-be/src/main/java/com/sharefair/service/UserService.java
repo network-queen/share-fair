@@ -45,6 +45,9 @@ public class UserService {
         if (request.getNeighborhood() != null && !request.getNeighborhood().isBlank()) {
             user.setNeighborhood(request.getNeighborhood());
         }
+        if (request.getAvatar() != null) {
+            user.setAvatar(request.getAvatar().isBlank() ? null : request.getAvatar());
+        }
 
         User updated = userRepository.update(user);
         return toDto(updated);

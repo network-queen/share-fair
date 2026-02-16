@@ -10,4 +10,5 @@ import lombok.NoArgsConstructor;
 public class UpdateUserRequest {
     private String name;
     private String neighborhood;
+    private String avatar;
 }

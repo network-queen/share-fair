@@ -28,7 +28,7 @@ export const getCurrentUser = createAsyncThunk('auth/getCurrentUser', async (_, 
 
 export const updateUser = createAsyncThunk(
   'auth/updateUser',
-  async ({ id, data }: { id: string; data: { name?: string; neighborhood?: string } }, { rejectWithValue }) => {
+  async ({ id, data }: { id: string; data: { name?: string; neighborhood?: string; avatar?: string } }, { rejectWithValue }) => {
     try {
       return await userService.updateUser(id, data);
     } catch (error: unknown) {

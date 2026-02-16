@@ -35,6 +35,7 @@ const ProfilePage = () => {
   const [isEditing, setIsEditing] = useState(false)
   const [editName, setEditName] = useState('')
   const [editNeighborhood, setEditNeighborhood] = useState('')
+  const [editAvatar, setEditAvatar] = useState('')
   const [saving, setSaving] = useState(false)
 
   useEffect(() => {
@@ -112,6 +113,7 @@ const ProfilePage = () => {
     if (!user) return
     setEditName(user.name || '')
     setEditNeighborhood(user.neighborhood || '')
+    setEditAvatar(user.avatar || '')
     setIsEditing(true)
   }
 
@@ -123,7 +125,7 @@ const ProfilePage = () => {
     if (!user) return
     setSaving(true)
     try {
-      await dispatch(updateUser({ id: user.id, data: { name: editName, neighborhood: editNeighborhood } })).unwrap()
+      await dispatch(updateUser({ id: user.id, data: { name: editName, neighborhood: editNeighborhood, avatar: editAvatar } })).unwrap()
       setIsEditing(false)
     } catch {
       // ignore
@@ -155,13 +157,30 @@ const ProfilePage = () => {
     <div className="space-y-8">
       {/* User Header */}
       <div className="bg-white rounded-lg shadow p-6 flex items-center gap-6">
-        {user.avatar ? (
-          <img src={user.avatar} alt={user.name} className="w-24 h-24 rounded-full object-cover" />
-        ) : (
-          <div className="w-24 h-24 bg-primary/10 text-primary rounded-full flex items-center justify-center text-3xl font-bold">
-            {initials}
-          </div>
-        )}
+        <div className="relative">
+          {(isEditing ? editAvatar : user.avatar) ? (
+            <img src={isEditing ? editAvatar : user.avatar} alt={user.name} className="w-24 h-24 rounded-full object-cover" />
+          ) : (
+            <div className="w-24 h-24 bg-primary/10 text-primary rounded-full flex items-center justify-center text-3xl font-bold">
+              {initials}
+            </div>
+          )}
+          {isEditing && (
+            <button
+              type="button"
+              onClick={() => {
+                const url = prompt(t('profile.avatarUrl'))
+                if (url !== null) setEditAvatar(url)
+              }}
+              className="absolute bottom-0 right-0 w-8 h-8 bg-primary text-white rounded-full flex items-center justify-center text-sm hover:bg-primary/90 shadow"
+              title={t('profile.changeAvatar')}
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-4 h-4">
+                <path d="M2.695 14.763l-1.262 3.154a.5.5 0 00.65.65l3.155-1.262a4 4 0 001.343-.885L17.5 5.5a2.121 2.121 0 00-3-3L3.58 13.42a4 4 0 00-.885 1.343z" />
+              </svg>
+            </button>
+          )}
+        </div>
         <div className="flex-1">
           {isEditing ? (
             <div className="space-y-3">

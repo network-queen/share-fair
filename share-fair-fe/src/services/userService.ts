@@ -4,6 +4,7 @@ import type { User, Listing } from '../types';
 interface UpdateUserRequest {
   name?: string;
   neighborhood?: string;
+  avatar?: string;
 }
 
 class UserService {

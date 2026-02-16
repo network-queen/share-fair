@@ -99,6 +99,8 @@
     "myTransactions": "My Transactions",
     "reviews": "Reviews",
     "edit": "Edit Profile",
+    "avatarUrl": "Enter image URL for your avatar",
+    "changeAvatar": "Change avatar",
     "noListings": "You don't have any listings yet",
     "noTransactions": "You don't have any transactions yet"
   },
