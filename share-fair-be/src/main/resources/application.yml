@@ -2,6 +2,10 @@ spring:
   application:
     name: sharefair-api
 
+  web:
+    resources:
+      add-mappings: false
+
   ai:
     ollama:
       base-url: ${SPRING_AI_OLLAMA_BASE_URL:http://localhost:11434}
