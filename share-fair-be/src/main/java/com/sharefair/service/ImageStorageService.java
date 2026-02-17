@@ -23,14 +23,14 @@ public class ImageStorageService {
 
     private final MinioClient minioClient;
     private final String bucket;
-    private final String endpoint;
+    private final String publicUrl;
 
     public ImageStorageService(MinioClient minioClient,
                                @Value("${minio.bucket}") String bucket,
-                               @Value("${minio.endpoint}") String endpoint) {
+                               @Value("${minio.public-url}") String publicUrl) {
         this.minioClient = minioClient;
         this.bucket = bucket;
-        this.endpoint = endpoint;
+        this.publicUrl = publicUrl;
     }
 
     public List<String> uploadImages(String listingId, List<MultipartFile> files) {
@@ -55,7 +55,7 @@ public class ImageStorageService {
                         .stream(is, file.getSize(), -1)
                         .contentType(contentType)
                         .build());
-                urls.add(endpoint + "/" + bucket + "/" + objectName);
+                urls.add(publicUrl + "/" + bucket + "/" + objectName);
             } catch (Exception e) {
                 log.error("Failed to upload image: {}", e.getMessage());
                 throw new RuntimeException("Image upload failed", e);
@@ -66,7 +66,7 @@ public class ImageStorageService {
 
     public void deleteImage(String imageUrl) {
         try {
-            String prefix = endpoint + "/" + bucket + "/";
+            String prefix = publicUrl + "/" + bucket + "/";
             if (!imageUrl.startsWith(prefix)) return;
             String objectName = imageUrl.substring(prefix.length());
             minioClient.removeObject(RemoveObjectArgs.builder()
