@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useAuth } from '../hooks/useAuth'
 import { useSearchParams, useNavigate } from 'react-router-dom'
+import SEO from '../components/SEO'
 
 const LoginPage = () => {
   const { t } = useTranslation()
@@ -38,7 +39,7 @@ const LoginPage = () => {
       <div className="flex items-center justify-center min-h-[calc(100vh-200px)]">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
-          <p className="text-gray-600">{t('common.loading')}</p>
+          <p className="text-gray-600 dark:text-gray-300">{t('common.loading')}</p>
         </div>
       </div>
     )
@@ -46,12 +47,13 @@ const LoginPage = () => {
 
   return (
     <div className="flex items-center justify-center min-h-[calc(100vh-200px)]">
-      <div className="w-full max-w-md p-8 bg-white rounded-lg shadow-lg">
+      <SEO title={t('auth.loginTitle')} />
+      <div className="w-full max-w-md p-8 bg-white dark:bg-gray-800 rounded-lg shadow-lg">
         <h1 className="text-3xl font-bold mb-2 text-center">{t('auth.loginTitle')}</h1>
-        <p className="text-gray-600 text-center mb-8">{t('auth.loginSubtitle')}</p>
+        <p className="text-gray-600 dark:text-gray-300 text-center mb-8">{t('auth.loginSubtitle')}</p>
 
         {error && (
-          <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm text-center">
+          <div className="mb-4 p-3 bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-700 rounded-lg text-red-700 text-sm text-center">
             {error}
           </div>
         )}
@@ -81,7 +83,7 @@ const LoginPage = () => {
           </button>
         </div>
 
-        <p className="text-sm text-gray-500 text-center mt-8">
+        <p className="text-sm text-gray-500 dark:text-gray-400 text-center mt-8">
           By logging in, you agree to our Terms of Service and Privacy Policy
         </p>
       </div>

@@ -11,6 +11,7 @@ import carbonService from '../services/carbonService'
 import trustScoreService from '../services/trustScoreService'
 import ReviewList from '../components/ReviewList'
 import TrustBadge from '../components/TrustBadge'
+import SEO from '../components/SEO'
 import type { TransactionResponse } from '../services/transactionService'
 import type { ReviewResponse } from '../services/reviewService'
 import NotificationPreferences from '../components/NotificationPreferences'
@@ -156,8 +157,9 @@ const ProfilePage = () => {
 
   return (
     <div className="space-y-8">
+      <SEO title={t('profile.title')} />
       {/* User Header */}
-      <div className="bg-white rounded-lg shadow p-6 flex items-center gap-6">
+      <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6 flex items-center gap-6">
         <div className="relative">
           {(isEditing ? editAvatar : user.avatar) ? (
             <img src={isEditing ? editAvatar : user.avatar} alt={user.name} className="w-24 h-24 rounded-full object-cover" />
@@ -186,21 +188,21 @@ const ProfilePage = () => {
           {isEditing ? (
             <div className="space-y-3">
               <div>
-                <label className="block text-sm font-medium text-gray-600 mb-1">{t('profile.name')}</label>
+                <label className="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-1">{t('profile.name')}</label>
                 <input
                   type="text"
                   value={editName}
                   onChange={(e) => setEditName(e.target.value)}
-                  className="w-full max-w-sm px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                  className="w-full max-w-sm px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary dark:bg-gray-700 dark:text-gray-100"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-600 mb-1">{t('search.neighborhood')}</label>
+                <label className="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-1">{t('search.neighborhood')}</label>
                 <input
                   type="text"
                   value={editNeighborhood}
                   onChange={(e) => setEditNeighborhood(e.target.value)}
-                  className="w-full max-w-sm px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                  className="w-full max-w-sm px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary dark:bg-gray-700 dark:text-gray-100"
                 />
               </div>
               <div className="flex gap-2">
@@ -213,7 +215,7 @@ const ProfilePage = () => {
                 </button>
                 <button
                   onClick={cancelEditing}
-                  className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50"
+                  className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700"
                 >
                   {t('common.cancel')}
                 </button>
@@ -222,8 +224,8 @@ const ProfilePage = () => {
           ) : (
             <>
               <h1 className="text-3xl font-bold">{user.name}</h1>
-              <p className="text-gray-600">{user.email}</p>
-              <p className="text-sm text-gray-500">{user.neighborhood}</p>
+              <p className="text-gray-600 dark:text-gray-300">{user.email}</p>
+              <p className="text-sm text-gray-500 dark:text-gray-400">{user.neighborhood}</p>
               <button
                 onClick={startEditing}
                 className="mt-2 text-sm text-primary hover:underline"
@@ -261,34 +263,34 @@ const ProfilePage = () => {
 
       {/* Tabs */}
       <div>
-        <div className="flex border-b mb-6">
+        <div className="flex border-b dark:border-gray-700 mb-6">
           <button
             onClick={() => setActiveTab('listings')}
-            className={`px-6 py-3 font-semibold ${activeTab === 'listings' ? 'border-b-2 border-primary text-primary' : 'text-gray-500 hover:text-gray-700'}`}
+            className={`px-6 py-3 font-semibold ${activeTab === 'listings' ? 'border-b-2 border-primary text-primary' : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200'}`}
           >
             {t('profile.myListings')} ({listings.length})
           </button>
           <button
             onClick={() => setActiveTab('transactions')}
-            className={`px-6 py-3 font-semibold ${activeTab === 'transactions' ? 'border-b-2 border-primary text-primary' : 'text-gray-500 hover:text-gray-700'}`}
+            className={`px-6 py-3 font-semibold ${activeTab === 'transactions' ? 'border-b-2 border-primary text-primary' : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200'}`}
           >
             {t('profile.myTransactions')} ({transactions.length})
           </button>
           <button
             onClick={() => setActiveTab('reviews')}
-            className={`px-6 py-3 font-semibold ${activeTab === 'reviews' ? 'border-b-2 border-primary text-primary' : 'text-gray-500 hover:text-gray-700'}`}
+            className={`px-6 py-3 font-semibold ${activeTab === 'reviews' ? 'border-b-2 border-primary text-primary' : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200'}`}
           >
             {t('review.reviews')} ({reviews.length})
           </button>
           <button
             onClick={() => setActiveTab('carbon')}
-            className={`px-6 py-3 font-semibold ${activeTab === 'carbon' ? 'border-b-2 border-primary text-primary' : 'text-gray-500 hover:text-gray-700'}`}
+            className={`px-6 py-3 font-semibold ${activeTab === 'carbon' ? 'border-b-2 border-primary text-primary' : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200'}`}
           >
             {t('carbon.history')}
           </button>
           <button
             onClick={() => setActiveTab('settings')}
-            className={`px-6 py-3 font-semibold ${activeTab === 'settings' ? 'border-b-2 border-primary text-primary' : 'text-gray-500 hover:text-gray-700'}`}
+            className={`px-6 py-3 font-semibold ${activeTab === 'settings' ? 'border-b-2 border-primary text-primary' : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200'}`}
           >
             {t('common.settings')}
           </button>
@@ -297,10 +299,10 @@ const ProfilePage = () => {
         {activeTab === 'listings' && (
           <div>
             {loadingListings ? (
-              <p className="text-center py-4 text-gray-500">{t('common.loading')}</p>
+              <p className="text-center py-4 text-gray-500 dark:text-gray-400">{t('common.loading')}</p>
             ) : listings.length === 0 ? (
               <div className="text-center py-8">
-                <p className="text-gray-500 mb-4">{t('profile.noListings')}</p>
+                <p className="text-gray-500 dark:text-gray-400 mb-4">{t('profile.noListings')}</p>
                 <Link to="/create-listing" className="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90">
                   {t('listing.create')}
                 </Link>
@@ -308,8 +310,8 @@ const ProfilePage = () => {
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {listings.map((listing) => (
-                  <Link key={listing.id} to={`/listing/${listing.id}`} className="bg-white rounded-lg shadow hover:shadow-md transition-shadow overflow-hidden">
-                    <div className="aspect-video bg-gray-200">
+                  <Link key={listing.id} to={`/listing/${listing.id}`} className="bg-white dark:bg-gray-800 rounded-lg shadow hover:shadow-md transition-shadow overflow-hidden">
+                    <div className="aspect-video bg-gray-200 dark:bg-gray-700">
                       {listing.images?.[0] && (
                         <img src={listing.images[0]} alt={listing.title} className="w-full h-full object-cover" />
                       )}
@@ -319,7 +321,7 @@ const ProfilePage = () => {
                       <p className={`font-bold ${listing.listingType === 'FREE' ? 'text-green-600' : 'text-primary'}`}>
                         {listing.listingType === 'FREE' ? t('listing.free') : `$${listing.pricePerDay || listing.price}/${t('transaction.day')}`}
                       </p>
-                      <span className={`inline-block mt-2 px-2 py-1 text-xs rounded ${listing.available ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-600'}`}>
+                      <span className={`inline-block mt-2 px-2 py-1 text-xs rounded ${listing.available ? 'bg-green-100 text-green-800' : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300'}`}>
                         {listing.available ? t('listing.available') : t('listing.unavailable')}
                       </span>
                     </div>
@@ -333,21 +335,21 @@ const ProfilePage = () => {
         {activeTab === 'transactions' && (
           <div>
             {loadingTransactions ? (
-              <p className="text-center py-4 text-gray-500">{t('common.loading')}</p>
+              <p className="text-center py-4 text-gray-500 dark:text-gray-400">{t('common.loading')}</p>
             ) : transactions.length === 0 ? (
-              <p className="text-center py-8 text-gray-500">{t('profile.noTransactions')}</p>
+              <p className="text-center py-8 text-gray-500 dark:text-gray-400">{t('profile.noTransactions')}</p>
             ) : (
               <div className="space-y-3">
                 {transactions.map((tx) => (
                   <Link
                     key={tx.id}
                     to={`/transactions/${tx.id}`}
-                    className="block bg-white rounded-lg shadow p-4 hover:shadow-md transition-shadow"
+                    className="block bg-white dark:bg-gray-800 rounded-lg shadow p-4 hover:shadow-md transition-shadow"
                   >
                     <div className="flex items-center justify-between">
                       <div>
                         <h3 className="font-semibold">{tx.listingTitle || t('transaction.rental')}</h3>
-                        <p className="text-sm text-gray-500">
+                        <p className="text-sm text-gray-500 dark:text-gray-400">
                           {tx.startDate} - {tx.endDate}
                         </p>
                       </div>
@@ -374,23 +376,23 @@ const ProfilePage = () => {
         {activeTab === 'carbon' && (
           <div>
             {loadingCarbon ? (
-              <p className="text-center py-4 text-gray-500">{t('common.loading')}</p>
+              <p className="text-center py-4 text-gray-500 dark:text-gray-400">{t('common.loading')}</p>
             ) : carbonHistory.length === 0 ? (
-              <p className="text-center py-8 text-gray-500">{t('carbon.noHistory')}</p>
+              <p className="text-center py-8 text-gray-500 dark:text-gray-400">{t('carbon.noHistory')}</p>
             ) : (
               <div className="space-y-3">
                 {carbonHistory.map((record) => (
-                  <div key={record.id} className="bg-white rounded-lg shadow p-4">
+                  <div key={record.id} className="bg-white dark:bg-gray-800 rounded-lg shadow p-4">
                     <div className="flex items-center justify-between">
                       <div>
                         <p className="font-semibold text-green-600">
                           {t('carbon.saved')}: {record.carbonSavedKg} kg CO₂
                         </p>
-                        <p className="text-sm text-gray-500">
+                        <p className="text-sm text-gray-500 dark:text-gray-400">
                           {t('carbon.estimated')}: {record.estimatedNewProductCarbon} kg
                         </p>
                       </div>
-                      <p className="text-sm text-gray-500">
+                      <p className="text-sm text-gray-500 dark:text-gray-400">
                         {record.createdAt ? new Date(record.createdAt).toLocaleDateString() : ''}
                       </p>
                     </div>

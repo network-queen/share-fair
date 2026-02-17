@@ -2,7 +2,7 @@ import { useEffect } from 'react'
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
 import { useAuth } from './hooks/useAuth'
 import { useLanguage } from './hooks/useLanguage'
-
+import { useTheme } from './hooks/useTheme'
 
 // Pages - Will be created in next iteration
 import HomePage from './pages/HomePage'
@@ -27,6 +27,7 @@ import ProtectedRoute from './components/ProtectedRoute'
 function App() {
   const { initAuth, isAuthenticated } = useAuth()
   const { initLanguage } = useLanguage()
+  useTheme()
 
   useEffect(() => {
     initAuth()

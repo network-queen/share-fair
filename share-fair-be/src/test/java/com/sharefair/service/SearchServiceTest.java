@@ -46,26 +46,26 @@ class SearchServiceTest {
     @Test
     void semanticSearch_withNullQuery_callsFindByFilters() {
         List<Listing> expected = List.of(createTestListing("1", "Item A"));
-        when(listingRepository.findByFilters(isNull(), isNull(), eq(10), eq(0)))
+        when(listingRepository.findByFilters(isNull(), isNull(), isNull(), eq(10), eq(0)))
                 .thenReturn(expected);
 
-        List<Listing> result = searchService.semanticSearch(null, null, null, 10, 0);
+        List<Listing> result = searchService.semanticSearch(null, null, null, null, 10, 0);
 
         assertThat(result).isEqualTo(expected);
-        verify(listingRepository).findByFilters(isNull(), isNull(), eq(10), eq(0));
+        verify(listingRepository).findByFilters(isNull(), isNull(), isNull(), eq(10), eq(0));
         verify(embeddingModel, never()).embed(anyString());
     }
 
     @Test
     void semanticSearch_withBlankQuery_callsFindByFilters() {
         List<Listing> expected = List.of(createTestListing("1", "Item A"));
-        when(listingRepository.findByFilters(eq("Brooklyn"), isNull(), eq(10), eq(0)))
+        when(listingRepository.findByFilters(eq("Brooklyn"), isNull(), isNull(), eq(10), eq(0)))
                 .thenReturn(expected);
 
-        List<Listing> result = searchService.semanticSearch("   ", "Brooklyn", null, 10, 0);
+        List<Listing> result = searchService.semanticSearch("   ", "Brooklyn", null, null, 10, 0);
 
         assertThat(result).isEqualTo(expected);
-        verify(listingRepository).findByFilters(eq("Brooklyn"), isNull(), eq(10), eq(0));
+        verify(listingRepository).findByFilters(eq("Brooklyn"), isNull(), isNull(), eq(10), eq(0));
         verify(embeddingModel, never()).embed(anyString());
     }
 
@@ -79,7 +79,7 @@ class SearchServiceTest {
                 eq(mockEmbedding), eq("Brooklyn"), isNull(), eq(0.8), eq(10), eq(0)
         )).thenReturn(expected);
 
-        List<Listing> result = searchService.semanticSearch("mountain bike", "Brooklyn", null, 10, 0);
+        List<Listing> result = searchService.semanticSearch("mountain bike", "Brooklyn", null, null, 10, 0);
 
         assertThat(result).isEqualTo(expected);
         verify(embeddingModel).embed("mountain bike");
@@ -93,13 +93,13 @@ class SearchServiceTest {
         List<Listing> expected = List.of(createTestListing("1", "Bike"));
 
         when(embeddingModel.embed("bike")).thenThrow(new RuntimeException("Ollama unavailable"));
-        when(listingRepository.findByKeyword(eq("bike"), isNull(), isNull(), eq(10), eq(0)))
+        when(listingRepository.findByKeyword(eq("bike"), isNull(), isNull(), isNull(), eq(10), eq(0)))
                 .thenReturn(expected);
 
-        List<Listing> result = searchService.semanticSearch("bike", null, null, 10, 0);
+        List<Listing> result = searchService.semanticSearch("bike", null, null, null, 10, 0);
 
         assertThat(result).isEqualTo(expected);
-        verify(listingRepository).findByKeyword(eq("bike"), isNull(), isNull(), eq(10), eq(0));
+        verify(listingRepository).findByKeyword(eq("bike"), isNull(), isNull(), isNull(), eq(10), eq(0));
     }
 
     @Test

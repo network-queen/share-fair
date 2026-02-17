@@ -8,6 +8,7 @@ import { createTransaction } from '../store/slices/transactionSlice'
 import ListingMap from '../components/ListingMap'
 import ReviewList from '../components/ReviewList'
 import TrustBadge from '../components/TrustBadge'
+import SEO from '../components/SEO'
 import listingService from '../services/listingService'
 import reviewService from '../services/reviewService'
 import trustScoreService from '../services/trustScoreService'
@@ -96,7 +97,7 @@ const ListingDetailPage = () => {
 
   if (error) {
     return (
-      <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
+      <div className="bg-red-100 dark:bg-red-900/30 border border-red-400 text-red-700 px-4 py-3 rounded">
         {t('common.error')}: {error}
       </div>
     )
@@ -111,9 +112,10 @@ const ListingDetailPage = () => {
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+      <SEO title={currentListing?.title} />
       {/* Image Gallery */}
       <div>
-        <div className="aspect-square bg-gray-200 rounded-lg overflow-hidden mb-4">
+        <div className="aspect-square bg-gray-200 dark:bg-gray-700 rounded-lg overflow-hidden mb-4">
           {currentListing.images?.[0] && (
             <img
               src={currentListing.images[0]}
@@ -125,7 +127,7 @@ const ListingDetailPage = () => {
         {currentListing.images?.length > 1 && (
           <div className="grid grid-cols-4 gap-4">
             {currentListing.images.map((image, index) => (
-              <div key={index} className="aspect-square bg-gray-200 rounded">
+              <div key={index} className="aspect-square bg-gray-200 dark:bg-gray-700 rounded">
                 <img src={image} alt={`${currentListing.title} ${index + 1}`} className="w-full h-full object-cover" />
               </div>
             ))}
@@ -137,17 +139,17 @@ const ListingDetailPage = () => {
       <div className="space-y-6">
         <div>
           <h1 className="text-4xl font-bold mb-2">{currentListing.title}</h1>
-          <p className="text-gray-600">{currentListing.neighborhood}</p>
+          <p className="text-gray-600 dark:text-gray-300">{currentListing.neighborhood}</p>
         </div>
 
-        <div className="border-t border-b py-4">
+        <div className="border-t border-b dark:border-gray-700 py-4">
           {currentListing.listingType === 'FREE' ? (
             <p className="text-3xl font-bold text-green-600">{t('listing.free')}</p>
           ) : (
             <>
               <p className="text-3xl font-bold text-primary">${currentListing.price}</p>
               {currentListing.pricePerDay != null && currentListing.pricePerDay > 0 && (
-                <p className="text-gray-600">${currentListing.pricePerDay} {t('listing.pricePerDay')}</p>
+                <p className="text-gray-600 dark:text-gray-300">${currentListing.pricePerDay} {t('listing.pricePerDay')}</p>
               )}
             </>
           )}
@@ -155,10 +157,10 @@ const ListingDetailPage = () => {
 
         <div>
           <h3 className="font-bold text-lg mb-2">{t('listing.description')}</h3>
-          <p className="text-gray-700">{currentListing.description}</p>
+          <p className="text-gray-700 dark:text-gray-200">{currentListing.description}</p>
         </div>
 
-        <div className="bg-gray-50 p-4 rounded-lg">
+        <div className="bg-gray-50 dark:bg-gray-800 p-4 rounded-lg">
           <h3 className="font-bold mb-2">{t('listing.owner')}</h3>
           {currentListing.owner && (
             <div>
@@ -168,7 +170,7 @@ const ListingDetailPage = () => {
                   <TrustBadge score={ownerTrust.score} tier={ownerTrust.tier} size="sm" />
                 </div>
               ) : (
-                <p className="text-sm text-gray-600">{t('profile.trustScore')}: {currentListing.owner.trustScore}</p>
+                <p className="text-sm text-gray-600 dark:text-gray-300">{t('profile.trustScore')}: {currentListing.owner.trustScore}</p>
               )}
             </div>
           )}
@@ -176,12 +178,12 @@ const ListingDetailPage = () => {
             <div className="mt-2 flex items-center gap-2">
               <div className="flex gap-0.5">
                 {[1, 2, 3, 4, 5].map((star) => (
-                  <span key={star} className={star <= Math.round(currentListing.ratings!) ? 'text-yellow-400' : 'text-gray-300'}>
+                  <span key={star} className={star <= Math.round(currentListing.ratings!) ? 'text-yellow-400' : 'text-gray-300 dark:text-gray-500'}>
                     ★
                   </span>
                 ))}
               </div>
-              <span className="text-sm text-gray-600">
+              <span className="text-sm text-gray-600 dark:text-gray-300">
                 ({currentListing.reviewCount} {t('review.reviews')})
               </span>
             </div>
@@ -223,8 +225,8 @@ const ListingDetailPage = () => {
               </button>
             </div>
             {showDeleteConfirm && (
-              <div className="bg-red-50 border border-red-200 p-4 rounded-lg">
-                <p className="text-red-800 mb-3">{t('listing.deleteConfirm')}</p>
+              <div className="bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-700 p-4 rounded-lg">
+                <p className="text-red-800 dark:text-red-300 mb-3">{t('listing.deleteConfirm')}</p>
                 <div className="flex gap-3">
                   <button
                     onClick={handleDelete}
@@ -235,7 +237,7 @@ const ListingDetailPage = () => {
                   </button>
                   <button
                     onClick={() => setShowDeleteConfirm(false)}
-                    className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50"
+                    className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700"
                   >
                     {t('common.cancel')}
                   </button>
@@ -256,27 +258,27 @@ const ListingDetailPage = () => {
                 {isFree ? t('listing.borrow') : t('listing.rent')}
               </button>
             ) : (
-              <div className="bg-gray-50 p-4 rounded-lg space-y-4">
+              <div className="bg-gray-50 dark:bg-gray-800 p-4 rounded-lg space-y-4">
                 <h3 className="font-bold">{t('transaction.selectDates')}</h3>
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-600 mb-1">{t('transaction.startDate')}</label>
+                    <label className="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-1">{t('transaction.startDate')}</label>
                     <input
                       type="date"
                       value={startDate}
                       onChange={(e) => setStartDate(e.target.value)}
                       min={new Date().toISOString().split('T')[0]}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary dark:bg-gray-700 dark:text-gray-100"
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-600 mb-1">{t('transaction.endDate')}</label>
+                    <label className="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-1">{t('transaction.endDate')}</label>
                     <input
                       type="date"
                       value={endDate}
                       onChange={(e) => setEndDate(e.target.value)}
                       min={startDate || new Date().toISOString().split('T')[0]}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary dark:bg-gray-700 dark:text-gray-100"
                     />
                   </div>
                 </div>
@@ -291,7 +293,7 @@ const ListingDetailPage = () => {
                   </button>
                   <button
                     onClick={() => { setShowRentForm(false); setRentError('') }}
-                    className="px-6 py-3 border border-gray-300 rounded-lg hover:bg-gray-50"
+                    className="px-6 py-3 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700"
                   >
                     {t('common.cancel')}
                   </button>

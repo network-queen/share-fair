@@ -75,10 +75,10 @@ _(none)_
 ## Backlog
 
 ### Frontend Polish (Priority: Low)
-- [ ] Dark mode
-- [ ] Accessibility audit (ARIA labels, keyboard navigation)
-- [ ] PWA support (service worker, offline)
-- [ ] SEO meta tags per page
+- [x] Dark mode (Tailwind v4 dark variant, Redux toggle, Navigation sun/moon button, persistent preference)
+- [x] Accessibility audit (ARIA labels, keyboard navigation, skip-to-content, role attributes, aria-expanded)
+- [x] PWA support (vite-plugin-pwa, service worker with workbox, manifest, app icons, offline caching)
+- [x] SEO meta tags per page (react-helmet-async, dynamic titles/descriptions, og:tags, twitter:card)
 
 ### DevOps & Infrastructure (Priority: Low)
 - [ ] CI/CD pipeline (GitHub Actions)

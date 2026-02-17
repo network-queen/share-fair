@@ -6,6 +6,7 @@ import { useAuth } from '../hooks/useAuth'
 import { fetchTransaction, updateTransactionStatus } from '../store/slices/transactionSlice'
 import PaymentForm from '../components/PaymentForm'
 import ReviewForm from '../components/ReviewForm'
+import SEO from '../components/SEO'
 import reviewService from '../services/reviewService'
 import type { ReviewResponse } from '../services/reviewService'
 
@@ -60,7 +61,7 @@ const TransactionDetailPage = () => {
 
   if (error) {
     return (
-      <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
+      <div className="bg-red-100 dark:bg-red-900/30 border border-red-400 text-red-700 px-4 py-3 rounded">
         {t('common.error')}: {error}
       </div>
     )
@@ -89,11 +90,12 @@ const TransactionDetailPage = () => {
 
   return (
     <div className="max-w-3xl mx-auto space-y-6">
+      <SEO title={t('transaction.myTransactions')} />
       <button onClick={() => navigate(-1)} className="text-primary hover:underline">
         {t('common.back')}
       </button>
 
-      <div className="bg-white rounded-lg shadow p-6 space-y-6">
+      <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6 space-y-6">
         {/* Header */}
         <div className="flex items-center justify-between">
           <div>
@@ -108,48 +110,48 @@ const TransactionDetailPage = () => {
         </div>
 
         {/* Details Grid */}
-        <div className="grid grid-cols-2 gap-6 border-t pt-6">
+        <div className="grid grid-cols-2 gap-6 border-t dark:border-gray-700 pt-6">
           <div>
-            <p className="text-sm text-gray-500">{t('transaction.owner')}</p>
+            <p className="text-sm text-gray-500 dark:text-gray-400">{t('transaction.owner')}</p>
             <p className="font-semibold">{tx.ownerName}</p>
           </div>
           <div>
-            <p className="text-sm text-gray-500">{t('transaction.borrower')}</p>
+            <p className="text-sm text-gray-500 dark:text-gray-400">{t('transaction.borrower')}</p>
             <p className="font-semibold">{tx.borrowerName}</p>
           </div>
           <div>
-            <p className="text-sm text-gray-500">{t('transaction.startDate')}</p>
+            <p className="text-sm text-gray-500 dark:text-gray-400">{t('transaction.startDate')}</p>
             <p className="font-semibold">{tx.startDate}</p>
           </div>
           <div>
-            <p className="text-sm text-gray-500">{t('transaction.endDate')}</p>
+            <p className="text-sm text-gray-500 dark:text-gray-400">{t('transaction.endDate')}</p>
             <p className="font-semibold">{tx.endDate}</p>
           </div>
           <div>
-            <p className="text-sm text-gray-500">{t('transaction.totalAmount')}</p>
+            <p className="text-sm text-gray-500 dark:text-gray-400">{t('transaction.totalAmount')}</p>
             <p className="font-semibold text-lg">
               {tx.isFree ? <span className="text-green-600">{t('listing.free')}</span> : `$${tx.totalAmount}`}
             </p>
           </div>
           {!tx.isFree && (
             <div>
-              <p className="text-sm text-gray-500">{t('transaction.serviceFee')}</p>
+              <p className="text-sm text-gray-500 dark:text-gray-400">{t('transaction.serviceFee')}</p>
               <p className="font-semibold">${tx.serviceFee}</p>
             </div>
           )}
           {!tx.isFree && (
             <div>
-              <p className="text-sm text-gray-500">{t('transaction.paymentStatus')}</p>
+              <p className="text-sm text-gray-500 dark:text-gray-400">{t('transaction.paymentStatus')}</p>
               <p className="font-semibold">{tx.paymentStatus}</p>
             </div>
           )}
           <div>
-            <p className="text-sm text-gray-500">{t('transaction.createdAt')}</p>
+            <p className="text-sm text-gray-500 dark:text-gray-400">{t('transaction.createdAt')}</p>
             <p className="font-semibold">{tx.createdAt ? new Date(tx.createdAt).toLocaleDateString() : '-'}</p>
           </div>
           {tx.completedAt && (
             <div>
-              <p className="text-sm text-gray-500">{t('transaction.completedAt')}</p>
+              <p className="text-sm text-gray-500 dark:text-gray-400">{t('transaction.completedAt')}</p>
               <p className="font-semibold">{new Date(tx.completedAt).toLocaleDateString()}</p>
             </div>
           )}
@@ -157,17 +159,17 @@ const TransactionDetailPage = () => {
 
         {/* Free Transaction Info */}
         {tx.isFree && tx.status === 'PENDING' && (
-          <div className="border-t pt-6">
-            <div className="bg-green-50 border border-green-200 p-4 rounded-lg">
-              <p className="font-semibold text-green-800">{t('transaction.freeTransaction')}</p>
-              <p className="text-sm text-green-700 mt-1">{t('transaction.waitingOwnerApproval')}</p>
+          <div className="border-t dark:border-gray-700 pt-6">
+            <div className="bg-green-50 dark:bg-green-900/30 border border-green-200 dark:border-green-700 p-4 rounded-lg">
+              <p className="font-semibold text-green-800 dark:text-green-300">{t('transaction.freeTransaction')}</p>
+              <p className="text-sm text-green-700 dark:text-green-400 mt-1">{t('transaction.waitingOwnerApproval')}</p>
             </div>
           </div>
         )}
 
         {/* Payment Section (only for paid transactions) */}
         {!tx.isFree && tx.status === 'PENDING' && isBorrower && !showPayment && (
-          <div className="border-t pt-6">
+          <div className="border-t dark:border-gray-700 pt-6">
             <button
               onClick={() => setShowPayment(true)}
               className="w-full px-6 py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700"
@@ -178,9 +180,9 @@ const TransactionDetailPage = () => {
         )}
 
         {!tx.isFree && showPayment && id && (
-          <div className="border-t pt-6 space-y-3">
+          <div className="border-t dark:border-gray-700 pt-6 space-y-3">
             {paymentError && (
-              <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded text-sm">
+              <div className="bg-red-100 dark:bg-red-900/30 border border-red-400 text-red-700 px-4 py-3 rounded text-sm">
                 {paymentError}
               </div>
             )}
@@ -196,7 +198,7 @@ const TransactionDetailPage = () => {
         )}
 
         {/* Action Buttons */}
-        <div className="border-t pt-6 flex gap-3">
+        <div className="border-t dark:border-gray-700 pt-6 flex gap-3">
           {tx.status === 'PENDING' && isOwner && (
             <button
               onClick={() => handleStatusUpdate('ACTIVE')}
@@ -208,7 +210,7 @@ const TransactionDetailPage = () => {
           {tx.status === 'PENDING' && (
             <button
               onClick={() => handleStatusUpdate('CANCELLED')}
-              className="px-6 py-3 bg-gray-200 text-gray-800 font-semibold rounded-lg hover:bg-gray-300"
+              className="px-6 py-3 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 font-semibold rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600"
             >
               {t('transaction.cancel')}
             </button>
@@ -223,7 +225,7 @@ const TransactionDetailPage = () => {
               </button>
               <button
                 onClick={() => handleStatusUpdate('DISPUTED')}
-                className="px-6 py-3 bg-red-100 text-red-700 font-semibold rounded-lg hover:bg-red-200"
+                className="px-6 py-3 bg-red-100 dark:bg-red-900/30 text-red-700 font-semibold rounded-lg hover:bg-red-200 dark:hover:bg-red-900/50"
               >
                 {t('transaction.dispute')}
               </button>
@@ -233,19 +235,19 @@ const TransactionDetailPage = () => {
 
         {/* Review Section */}
         {tx.status === 'COMPLETED' && reviewChecked && (
-          <div className="border-t pt-6">
+          <div className="border-t dark:border-gray-700 pt-6">
             {existingReview ? (
-              <div className="bg-green-50 p-4 rounded-lg">
-                <p className="font-semibold text-green-800 mb-2">{t('review.alreadyReviewed')}</p>
+              <div className="bg-green-50 dark:bg-green-900/30 p-4 rounded-lg">
+                <p className="font-semibold text-green-800 dark:text-green-300 mb-2">{t('review.alreadyReviewed')}</p>
                 <div className="flex gap-0.5 mb-1">
                   {[1, 2, 3, 4, 5].map((star) => (
-                    <span key={star} className={star <= existingReview.rating ? 'text-yellow-400' : 'text-gray-300'}>
+                    <span key={star} className={star <= existingReview.rating ? 'text-yellow-400' : 'text-gray-300 dark:text-gray-500'}>
                       ★
                     </span>
                   ))}
                 </div>
                 {existingReview.comment && (
-                  <p className="text-gray-700 text-sm">{existingReview.comment}</p>
+                  <p className="text-gray-700 dark:text-gray-200 text-sm">{existingReview.comment}</p>
                 )}
               </div>
             ) : showReviewForm && id ? (

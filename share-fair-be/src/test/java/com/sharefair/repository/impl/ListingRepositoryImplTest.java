@@ -115,7 +115,7 @@ class ListingRepositoryImplTest extends BaseIntegrationTest {
 
     @Test
     void findByKeyword_matchesTitleAndDescription() {
-        List<Listing> results = listingRepository.findByKeyword("bike", null, null, 10, 0);
+        List<Listing> results = listingRepository.findByKeyword("bike", null, null, null, 10, 0);
 
         assertThat(results).isNotEmpty();
         assertThat(results).anySatisfy(listing ->
@@ -125,7 +125,7 @@ class ListingRepositoryImplTest extends BaseIntegrationTest {
 
     @Test
     void findByFilters_combinesNeighborhoodAndCategoryFilters() {
-        List<Listing> results = listingRepository.findByFilters("Brooklyn", "Sports", 10, 0);
+        List<Listing> results = listingRepository.findByFilters("Brooklyn", "Sports", null, 10, 0);
 
         assertThat(results).isNotEmpty();
         assertThat(results).allSatisfy(listing -> {

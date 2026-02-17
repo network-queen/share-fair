@@ -18,7 +18,10 @@
     "loading": "Завантаження...",
     "error": "Помилка",
     "success": "Успіх",
-    "warning": "Попередження"
+    "warning": "Попередження",
+    "darkMode": "Темна тема",
+    "lightMode": "Світла тема",
+    "skipToContent": "Перейти до вмісту"
   },
   "auth": {
     "loginTitle": "Ласкаво просимо в Sharefair",

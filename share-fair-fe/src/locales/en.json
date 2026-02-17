@@ -18,7 +18,10 @@
     "loading": "Loading...",
     "error": "Error",
     "success": "Success",
-    "warning": "Warning"
+    "warning": "Warning",
+    "darkMode": "Dark mode",
+    "lightMode": "Light mode",
+    "skipToContent": "Skip to content"
   },
   "auth": {
     "loginTitle": "Welcome to Sharefair",

@@ -85,7 +85,7 @@ const NotificationBell = () => {
     <div className="relative" ref={dropdownRef}>
       <button
         onClick={handleOpen}
-        className="relative p-2 text-gray-600 hover:text-gray-900"
+        className="relative p-2 text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100"
         aria-label={t('notification.notifications')}
       >
         <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -99,8 +99,8 @@ const NotificationBell = () => {
       </button>
 
       {isOpen && (
-        <div className="absolute right-0 mt-2 w-80 bg-white rounded-lg shadow-lg border z-50 max-h-96 overflow-hidden">
-          <div className="flex items-center justify-between px-4 py-3 border-b">
+        <div className="absolute right-0 mt-2 w-80 bg-white dark:bg-gray-800 rounded-lg shadow-lg border dark:border-gray-700 z-50 max-h-96 overflow-hidden">
+          <div className="flex items-center justify-between px-4 py-3 border-b dark:border-gray-700">
             <h3 className="font-semibold">{t('notification.notifications')}</h3>
             {unreadCount > 0 && (
               <button
@@ -114,28 +114,28 @@ const NotificationBell = () => {
 
           <div className="overflow-y-auto max-h-72">
             {loading && (
-              <p className="text-center py-4 text-gray-500 text-sm">{t('common.loading')}</p>
+              <p className="text-center py-4 text-gray-500 dark:text-gray-400 text-sm">{t('common.loading')}</p>
             )}
 
             {!loading && notifications.length === 0 && (
-              <p className="text-center py-8 text-gray-400 text-sm">{t('notification.noNotifications')}</p>
+              <p className="text-center py-8 text-gray-400 dark:text-gray-500 text-sm">{t('notification.noNotifications')}</p>
             )}
 
             {notifications.map((notification) => (
               <button
                 key={notification.id}
                 onClick={() => handleNotificationClick(notification)}
-                className={`w-full text-left px-4 py-3 border-b last:border-b-0 hover:bg-gray-50 ${
-                  !notification.isRead ? 'bg-blue-50' : ''
+                className={`w-full text-left px-4 py-3 border-b dark:border-gray-700 last:border-b-0 hover:bg-gray-50 dark:hover:bg-gray-700 ${
+                  !notification.isRead ? 'bg-blue-50 dark:bg-blue-900/30' : ''
                 }`}
               >
                 <div className="flex justify-between items-start">
                   <p className="font-medium text-sm">{notification.title}</p>
-                  <span className="text-xs text-gray-400 ml-2 whitespace-nowrap">
+                  <span className="text-xs text-gray-400 dark:text-gray-500 ml-2 whitespace-nowrap">
                     {timeAgo(notification.createdAt)}
                   </span>
                 </div>
-                <p className="text-sm text-gray-600 mt-0.5">{notification.message}</p>
+                <p className="text-sm text-gray-600 dark:text-gray-300 mt-0.5">{notification.message}</p>
               </button>
             ))}
           </div>
