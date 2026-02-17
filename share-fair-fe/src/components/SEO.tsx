@@ -1,5 +1,3 @@
-import { Helmet } from 'react-helmet-async'
-
 interface SEOProps {
   title?: string
   description?: string
@@ -11,7 +9,7 @@ const SEO = ({ title, description }: SEOProps) => {
   const desc = description || 'Share, borrow, and rent items in your community. Reduce waste and save money with Sharefair.'
 
   return (
-    <Helmet>
+    <>
       <title>{fullTitle}</title>
       <meta name="description" content={desc} />
       <meta property="og:title" content={fullTitle} />
@@ -20,7 +18,7 @@ const SEO = ({ title, description }: SEOProps) => {
       <meta name="twitter:card" content="summary" />
       <meta name="twitter:title" content={fullTitle} />
       <meta name="twitter:description" content={desc} />
-    </Helmet>
+    </>
   )
 }
 
