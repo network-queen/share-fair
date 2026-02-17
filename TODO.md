@@ -87,7 +87,7 @@ _(none)_
 - [ ] Production environment configuration
 - [ ] Database backup strategy
 - [ ] Monitoring (Prometheus + Grafana)
-- [ ] Centralized logging (ELK stack)
+- [x] Centralized logging (ELK stack — Elasticsearch 8.12 + Logstash + Kibana, logstash-logback-encoder, JSON structured logs via TCP)
 - [ ] Rate limiting on public endpoints
 - [ ] HTTPS configuration
 
