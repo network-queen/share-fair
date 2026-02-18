@@ -104,8 +104,6 @@ services:
       context: ./share-fair-be
       dockerfile: Dockerfile
     container_name: sharefair-api
-    ports:
-      - "8080:8080"
     environment:
       SPRING_PROFILES_ACTIVE: docker
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/sharefair_db
@@ -143,15 +141,58 @@ services:
       context: ./share-fair-fe
       dockerfile: Dockerfile
     container_name: sharefair-frontend
-    ports:
-      - "5173:5173"
     environment:
-      VITE_API_BASE_URL: http://localhost:8080/api/v1
+      VITE_API_BASE_URL: /api/v1
     volumes:
       - ./share-fair-fe/src:/app/src
       - ./share-fair-fe/public:/app/public
     depends_on:
       - api
+    networks:
+      - sharefair-network
+
+  nginx:
+    image: nginx:alpine
+    container_name: sharefair-nginx
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./docker/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./docker/nginx/certs:/etc/nginx/certs:ro
+    depends_on:
+      - api
+      - frontend
+    networks:
+      - sharefair-network
+
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: sharefair-prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./docker/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus_data:/prometheus
+    depends_on:
+      - api
+    networks:
+      - sharefair-network
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: sharefair-grafana
+    ports:
+      - "3000:3000"
+    environment:
+      GF_AUTH_ANONYMOUS_ENABLED: "true"
+      GF_AUTH_ANONYMOUS_ORG_ROLE: Admin
+      GF_AUTH_DISABLE_LOGIN_FORM: "true"
+    volumes:
+      - ./docker/grafana/provisioning:/etc/grafana/provisioning:ro
+      - grafana_data:/var/lib/grafana
+    depends_on:
+      - prometheus
     networks:
       - sharefair-network
 
@@ -163,6 +204,10 @@ volumes:
   ollama_data:
     driver: local
   elasticsearch_data:
+    driver: local
+  prometheus_data:
+    driver: local
+  grafana_data:
     driver: local
 
 networks:

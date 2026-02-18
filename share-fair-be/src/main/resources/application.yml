@@ -59,6 +59,25 @@ server:
   port: 8080
   servlet:
     context-path: /
+  forward-headers-strategy: framework
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health, prometheus
+  endpoint:
+    health:
+      show-details: when-authorized
+    prometheus:
+      enabled: true
+  prometheus:
+    metrics:
+      export:
+        enabled: true
+  metrics:
+    tags:
+      application: sharefair-api
 
 jwt:
   secret: ${JWT_SECRET:sharefair-dev-secret-key-min-256-bits-change-in-production-env}

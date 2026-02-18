@@ -47,6 +47,10 @@ Thumbs.db
 # Docker
 .dockerignore
 
+# TLS certificates (generated, not committed)
+docker/nginx/certs/*.crt
+docker/nginx/certs/*.key
+
 # Claude Code
 .claude/
 

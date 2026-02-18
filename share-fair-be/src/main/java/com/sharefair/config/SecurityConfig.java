@@ -55,6 +55,8 @@ public class SecurityConfig {
                         .requestMatchers("/api/v1/notifications/**").authenticated()
                         .requestMatchers("/api/v1/notification-preferences/**").authenticated()
                         .requestMatchers(HttpMethod.PATCH, "/api/v1/listings/**").authenticated()
+                        .requestMatchers("/actuator/health").permitAll()
+                        .requestMatchers("/actuator/prometheus").permitAll()
                         .anyRequest().permitAll()
                 )
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
