@@ -2,7 +2,7 @@ package com.sharefair.service;
 
 import com.sharefair.dto.AuthResponse;
 import com.sharefair.dto.OAuthUserInfo;
-import com.sharefair.dto.UserDto;
+import com.sharefair.dto.UserMapper;
 import com.sharefair.entity.User;
 import com.sharefair.exception.OAuthException;
 import com.sharefair.repository.UserRepository;
@@ -65,22 +65,10 @@ public class OAuthService {
         String accessToken = tokenProvider.generateAccessToken(user.getId(), user.getEmail());
         String refreshToken = tokenProvider.generateRefreshToken(user.getId());
 
-        UserDto userDto = UserDto.builder()
-                .id(user.getId())
-                .email(user.getEmail())
-                .name(user.getName())
-                .avatar(user.getAvatar())
-                .neighborhood(user.getNeighborhood())
-                .trustScore(user.getTrustScore())
-                .carbonSaved(user.getCarbonSaved())
-                .createdAt(user.getCreatedAt())
-                .verificationStatus(user.getVerificationStatus())
-                .build();
-
         return AuthResponse.builder()
                 .accessToken(accessToken)
                 .refreshToken(refreshToken)
-                .user(userDto)
+                .user(UserMapper.toDto(user))
                 .build();
     }
 

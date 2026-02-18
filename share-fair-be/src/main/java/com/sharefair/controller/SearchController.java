@@ -2,6 +2,7 @@ package com.sharefair.controller;
 
 import com.sharefair.dto.ApiResponse;
 import com.sharefair.dto.ListingDto;
+import com.sharefair.dto.ListingMapper;
 import com.sharefair.entity.Listing;
 import com.sharefair.repository.NeighborhoodRepository;
 import com.sharefair.service.SearchService;
@@ -15,7 +16,6 @@ import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/v1/search")
-@CrossOrigin(origins = "*")
 public class SearchController {
     private final NeighborhoodRepository neighborhoodRepository;
     private final SearchService searchService;
@@ -50,7 +50,7 @@ public class SearchController {
         }
 
         List<ListingDto> dtos = listings.stream()
-                .map(this::toDto)
+                .map(ListingMapper::toDto)
                 .collect(Collectors.toList());
 
         Map<String, Object> response = new HashMap<>();
@@ -86,7 +86,7 @@ public class SearchController {
         List<Listing> listings = searchService.searchByLocation(latitude, longitude, radius, limit, offset);
 
         List<ListingDto> dtos = listings.stream()
-                .map(this::toDto)
+                .map(ListingMapper::toDto)
                 .collect(Collectors.toList());
 
         Map<String, Object> response = new HashMap<>();
@@ -115,24 +115,4 @@ public class SearchController {
         return ResponseEntity.ok(ApiResponse.success(suggestions));
     }
 
-    private ListingDto toDto(Listing listing) {
-        ListingDto dto = new ListingDto();
-        dto.setId(listing.getId());
-        dto.setTitle(listing.getTitle());
-        dto.setDescription(listing.getDescription());
-        dto.setCategory(listing.getCategory());
-        dto.setCondition(listing.getCondition());
-        dto.setOwnerId(listing.getOwnerId());
-        dto.setPrice(listing.getPrice());
-        dto.setPricePerDay(listing.getPricePerDay());
-        dto.setImages(listing.getImages());
-        dto.setLatitude(listing.getLatitude());
-        dto.setLongitude(listing.getLongitude());
-        dto.setNeighborhood(listing.getNeighborhood());
-        dto.setAvailable(listing.getAvailable());
-        dto.setCreatedAt(listing.getCreatedAt());
-        dto.setUpdatedAt(listing.getUpdatedAt());
-        dto.setDistanceKm(listing.getDistanceKm());
-        return dto;
-    }
 }

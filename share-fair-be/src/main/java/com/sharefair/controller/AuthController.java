@@ -77,7 +77,7 @@ public class AuthController {
         AuthResponse response = AuthResponse.builder()
                 .accessToken(newAccessToken)
                 .refreshToken(refreshToken)
-                .user(toDto(user))
+                .user(UserMapper.toDto(user))
                 .build();
 
         return ResponseEntity.ok(ApiResponse.success(response));
@@ -94,7 +94,7 @@ public class AuthController {
             return ResponseEntity.status(404).body(ApiResponse.error("User not found"));
         }
 
-        return ResponseEntity.ok(ApiResponse.success(toDto(userOpt.get())));
+        return ResponseEntity.ok(ApiResponse.success(UserMapper.toDto(userOpt.get())));
     }
 
     @PostMapping("/logout")
@@ -103,19 +103,5 @@ public class AuthController {
                 .success(true)
                 .data("Logged out successfully")
                 .build());
-    }
-
-    private UserDto toDto(User user) {
-        return UserDto.builder()
-                .id(user.getId())
-                .email(user.getEmail())
-                .name(user.getName())
-                .avatar(user.getAvatar())
-                .neighborhood(user.getNeighborhood())
-                .trustScore(user.getTrustScore())
-                .carbonSaved(user.getCarbonSaved())
-                .verificationStatus(user.getVerificationStatus())
-                .createdAt(user.getCreatedAt())
-                .build();
     }
 }

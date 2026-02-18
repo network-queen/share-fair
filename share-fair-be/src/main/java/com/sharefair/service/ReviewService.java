@@ -103,10 +103,9 @@ public class ReviewService {
     }
 
     private ReviewDto enrichDto(Review review) {
-        String reviewerName = userRepository.findById(review.getReviewerId())
-                .map(User::getName).orElse("Unknown");
-        String reviewerAvatar = userRepository.findById(review.getReviewerId())
-                .map(User::getAvatar).orElse(null);
+        User reviewer = userRepository.findById(review.getReviewerId()).orElse(null);
+        String reviewerName = reviewer != null ? reviewer.getName() : "Unknown";
+        String reviewerAvatar = reviewer != null ? reviewer.getAvatar() : null;
         String revieweeName = userRepository.findById(review.getRevieweeId())
                 .map(User::getName).orElse("Unknown");
 

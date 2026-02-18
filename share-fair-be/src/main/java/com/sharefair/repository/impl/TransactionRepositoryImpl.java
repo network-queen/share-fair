@@ -7,8 +7,6 @@ import org.jooq.impl.DSL;
 import org.springframework.stereotype.Repository;
 
 import java.math.BigDecimal;
-import java.sql.Date;
-import java.sql.Timestamp;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -128,6 +126,24 @@ public class TransactionRepositoryImpl implements TransactionRepository {
                 .execute();
     }
 
+    @Override
+    public int countByBorrowerIdAndStatus(String borrowerId, String status) {
+        return dsl.fetchCount(
+                DSL.selectFrom(DSL.table(TABLE))
+                        .where(DSL.field("borrower_id").eq(UUID.fromString(borrowerId)))
+                        .and(DSL.field("status").eq(status))
+        );
+    }
+
+    @Override
+    public int countByOwnerIdAndStatus(String ownerId, String status) {
+        return dsl.fetchCount(
+                DSL.selectFrom(DSL.table(TABLE))
+                        .where(DSL.field("owner_id").eq(UUID.fromString(ownerId)))
+                        .and(DSL.field("status").eq(status))
+        );
+    }
+
     private Transaction mapToTransaction(org.jooq.Record record) {
         return Transaction.builder()
                 .id(record.get(DSL.field("id"), String.class))
@@ -135,29 +151,14 @@ public class TransactionRepositoryImpl implements TransactionRepository {
                 .borrowerId(record.get(DSL.field("borrower_id"), String.class))
                 .ownerId(record.get(DSL.field("owner_id"), String.class))
                 .status(record.get(DSL.field("status"), String.class))
-                .startDate(toLocalDate(record.get(DSL.field("start_date"))))
-                .endDate(toLocalDate(record.get(DSL.field("end_date"))))
+                .startDate(JooqUtils.toLocalDate(record.get(DSL.field("start_date"))))
+                .endDate(JooqUtils.toLocalDate(record.get(DSL.field("end_date"))))
                 .totalAmount(record.get(DSL.field("total_amount"), BigDecimal.class))
                 .serviceFee(record.get(DSL.field("service_fee"), BigDecimal.class))
                 .paymentStatus(record.get(DSL.field("payment_status"), String.class))
                 .stripePaymentId(record.get(DSL.field("stripe_payment_id"), String.class))
-                .createdAt(toLocalDateTime(record.get(DSL.field("created_at"))))
-                .completedAt(toLocalDateTime(record.get(DSL.field("completed_at"))))
+                .createdAt(JooqUtils.toLocalDateTime(record.get(DSL.field("created_at"))))
+                .completedAt(JooqUtils.toLocalDateTime(record.get(DSL.field("completed_at"))))
                 .build();
-    }
-
-    private LocalDateTime toLocalDateTime(Object value) {
-        if (value == null) return null;
-        if (value instanceof LocalDateTime) return (LocalDateTime) value;
-        if (value instanceof Timestamp) return ((Timestamp) value).toLocalDateTime();
-        return null;
-    }
-
-    private LocalDate toLocalDate(Object value) {
-        if (value == null) return null;
-        if (value instanceof LocalDate) return (LocalDate) value;
-        if (value instanceof Date) return ((Date) value).toLocalDate();
-        if (value instanceof java.util.Date) return new Date(((java.util.Date) value).getTime()).toLocalDate();
-        return null;
     }
 }

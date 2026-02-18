@@ -12,7 +12,6 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/api/v1/carbon")
-@CrossOrigin(origins = "*")
 public class CarbonController {
 
     private final CarbonService carbonService;

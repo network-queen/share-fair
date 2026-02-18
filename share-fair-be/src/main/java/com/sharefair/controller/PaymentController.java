@@ -11,7 +11,6 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/v1/payments")
-@CrossOrigin(origins = "*")
 public class PaymentController {
 
     private final PaymentService paymentService;

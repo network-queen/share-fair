@@ -35,12 +35,8 @@ public class TrustScoreService {
     }
 
     public TrustScore recalculateTrustScore(String userId) {
-        int completedAsBorrower = (int) transactionRepository.findByBorrowerId(userId).stream()
-                .filter(tx -> "COMPLETED".equals(tx.getStatus()))
-                .count();
-        int completedAsOwner = (int) transactionRepository.findByOwnerId(userId).stream()
-                .filter(tx -> "COMPLETED".equals(tx.getStatus()))
-                .count();
+        int completedAsBorrower = transactionRepository.countByBorrowerIdAndStatus(userId, "COMPLETED");
+        int completedAsOwner = transactionRepository.countByOwnerIdAndStatus(userId, "COMPLETED");
         int completedTransactions = completedAsBorrower + completedAsOwner;
 
         List<Review> reviews = reviewRepository.findByRevieweeId(userId);

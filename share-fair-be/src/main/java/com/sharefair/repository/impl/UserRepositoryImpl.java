@@ -5,7 +5,6 @@ import com.sharefair.repository.UserRepository;
 import org.jooq.DSLContext;
 import org.jooq.impl.DSL;
 import org.springframework.stereotype.Repository;
-import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -169,21 +168,8 @@ public class UserRepositoryImpl implements UserRepository {
                 .verificationStatus(record.get(DSL.field("verification_status"), String.class))
                 .oauthProvider(record.get(DSL.field("oauth_provider"), String.class))
                 .oauthId(record.get(DSL.field("oauth_id"), String.class))
-                .createdAt(toLocalDateTime(record.get(DSL.field("created_at"))))
-                .updatedAt(toLocalDateTime(record.get(DSL.field("updated_at"))))
+                .createdAt(JooqUtils.toLocalDateTime(record.get(DSL.field("created_at"))))
+                .updatedAt(JooqUtils.toLocalDateTime(record.get(DSL.field("updated_at"))))
                 .build();
-    }
-
-    private LocalDateTime toLocalDateTime(Object value) {
-        if (value == null) {
-            return null;
-        }
-        if (value instanceof LocalDateTime) {
-            return (LocalDateTime) value;
-        }
-        if (value instanceof Timestamp) {
-            return ((Timestamp) value).toLocalDateTime();
-        }
-        return null;
     }
 }

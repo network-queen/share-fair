@@ -7,7 +7,6 @@ import org.jooq.impl.DSL;
 import org.springframework.stereotype.Repository;
 
 import java.math.BigDecimal;
-import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.*;
 
@@ -120,14 +119,7 @@ public class CarbonSavedRepositoryImpl implements CarbonSavedRepository {
                 .userId(record.get(DSL.field("user_id"), String.class))
                 .carbonSavedKg(record.get(DSL.field("carbon_saved_kg"), BigDecimal.class))
                 .estimatedNewProductCarbon(record.get(DSL.field("estimated_new_product_carbon"), BigDecimal.class))
-                .createdAt(toLocalDateTime(record.get(DSL.field("created_at"))))
+                .createdAt(JooqUtils.toLocalDateTime(record.get(DSL.field("created_at"))))
                 .build();
-    }
-
-    private LocalDateTime toLocalDateTime(Object value) {
-        if (value == null) return null;
-        if (value instanceof LocalDateTime) return (LocalDateTime) value;
-        if (value instanceof Timestamp) return ((Timestamp) value).toLocalDateTime();
-        return null;
     }
 }

@@ -23,7 +23,7 @@ public class CarbonService {
     private static final Map<String, BigDecimal> CATEGORY_CO2_KG = Map.of(
             "Electronics", BigDecimal.valueOf(50),
             "Tools", BigDecimal.valueOf(20),
-            "Sports", BigDecimal.valueOf(15),
+            "Sports & Outdoors", BigDecimal.valueOf(15),
             "Furniture", BigDecimal.valueOf(100),
             "Books", BigDecimal.valueOf(5),
             "Clothing", BigDecimal.valueOf(10),

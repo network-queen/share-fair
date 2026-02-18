@@ -9,7 +9,6 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/v1/trust-scores")
-@CrossOrigin(origins = "*")
 public class TrustScoreController {
 
     private final TrustScoreService trustScoreService;

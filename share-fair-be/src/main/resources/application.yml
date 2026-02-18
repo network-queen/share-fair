@@ -17,9 +17,9 @@ spring:
           model: all-minilm:l6-v2
 
   datasource:
-    url: jdbc:postgresql://localhost:5432/sharefair_db
-    username: sharefair_user
-    password: sharefair_password
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/sharefair_db}
+    username: ${SPRING_DATASOURCE_USERNAME:sharefair_user}
+    password: ${SPRING_DATASOURCE_PASSWORD:sharefair_password}
     driver-class-name: org.postgresql.Driver
 
   jpa:

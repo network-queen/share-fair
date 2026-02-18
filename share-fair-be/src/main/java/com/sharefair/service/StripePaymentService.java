@@ -3,7 +3,9 @@ package com.sharefair.service;
 import com.sharefair.config.StripeConfig;
 import com.sharefair.dto.PaymentIntentResponse;
 import com.sharefair.entity.Transaction;
+import com.sharefair.exception.ResourceNotFoundException;
 import com.sharefair.repository.TransactionRepository;
+import org.springframework.security.access.AccessDeniedException;
 import com.stripe.exception.SignatureVerificationException;
 import com.stripe.exception.StripeException;
 import com.stripe.model.Event;
@@ -30,18 +32,18 @@ public class StripePaymentService implements PaymentService {
     @Override
     public PaymentIntentResponse createPaymentIntent(String transactionId, String principalId) {
         Transaction tx = transactionRepository.findById(transactionId)
-                .orElseThrow(() -> new RuntimeException("Transaction not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Transaction not found"));
 
         if (!tx.getBorrowerId().equals(principalId)) {
-            throw new RuntimeException("Only the borrower can pay for this transaction");
+            throw new AccessDeniedException("Only the borrower can pay for this transaction");
         }
 
         if (!"PENDING".equals(tx.getStatus())) {
-            throw new RuntimeException("Transaction is not in PENDING status");
+            throw new IllegalArgumentException("Transaction is not in PENDING status");
         }
 
         if (tx.getTotalAmount().compareTo(java.math.BigDecimal.ZERO) == 0) {
-            throw new RuntimeException("Payment is not required for free transactions");
+            throw new IllegalArgumentException("Payment is not required for free transactions");
         }
 
         long amountInCents = tx.getTotalAmount().movePointRight(2).longValue();
@@ -71,7 +73,7 @@ public class StripePaymentService implements PaymentService {
 
         } catch (StripeException e) {
             log.error("Stripe error creating payment intent for transaction {}: {}", transactionId, e.getMessage());
-            throw new RuntimeException("Payment processing error: " + e.getMessage());
+            throw new IllegalStateException("Payment processing error: " + e.getMessage(), e);
         }
     }
 
@@ -82,7 +84,7 @@ public class StripePaymentService implements PaymentService {
             event = Webhook.constructEvent(payload, sigHeader, stripeConfig.getWebhookSecret());
         } catch (SignatureVerificationException e) {
             log.warn("Invalid Stripe webhook signature");
-            throw new RuntimeException("Invalid webhook signature");
+            throw new SecurityException("Invalid webhook signature");
         }
 
         switch (event.getType()) {

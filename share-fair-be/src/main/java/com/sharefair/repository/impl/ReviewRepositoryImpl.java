@@ -6,7 +6,6 @@ import org.jooq.DSLContext;
 import org.jooq.impl.DSL;
 import org.springframework.stereotype.Repository;
 
-import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -112,14 +111,7 @@ public class ReviewRepositoryImpl implements ReviewRepository {
                 .revieweeId(record.get(DSL.field("reviewee_id"), String.class))
                 .rating(record.get(DSL.field("rating"), Integer.class))
                 .comment(record.get(DSL.field("comment"), String.class))
-                .createdAt(toLocalDateTime(record.get(DSL.field("created_at"))))
+                .createdAt(JooqUtils.toLocalDateTime(record.get(DSL.field("created_at"))))
                 .build();
-    }
-
-    private LocalDateTime toLocalDateTime(Object value) {
-        if (value == null) return null;
-        if (value instanceof LocalDateTime) return (LocalDateTime) value;
-        if (value instanceof Timestamp) return ((Timestamp) value).toLocalDateTime();
-        return null;
     }
 }

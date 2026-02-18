@@ -10,7 +10,6 @@ import org.springframework.stereotype.Repository;
 import java.math.BigDecimal;
 import java.sql.Array;
 import java.sql.SQLException;
-import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -377,22 +376,9 @@ public class ListingRepositoryImpl implements ListingRepository {
                 .available(record.get(DSL.field("available"), Boolean.class))
                 .status(record.get(DSL.field("status"), String.class))
                 .listingType(record.get(DSL.field("listing_type"), String.class))
-                .createdAt(toLocalDateTime(record.get(DSL.field("created_at"))))
-                .updatedAt(toLocalDateTime(record.get(DSL.field("updated_at"))))
+                .createdAt(JooqUtils.toLocalDateTime(record.get(DSL.field("created_at"))))
+                .updatedAt(JooqUtils.toLocalDateTime(record.get(DSL.field("updated_at"))))
                 .build();
-    }
-
-    private LocalDateTime toLocalDateTime(Object value) {
-        if (value == null) {
-            return null;
-        }
-        if (value instanceof LocalDateTime) {
-            return (LocalDateTime) value;
-        }
-        if (value instanceof Timestamp) {
-            return ((Timestamp) value).toLocalDateTime();
-        }
-        return null;
     }
 
     private List<String> extractStringArray(Object value) {

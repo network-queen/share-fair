@@ -1,9 +1,10 @@
 package com.sharefair.service;
 
 import com.sharefair.dto.ListingDto;
+import com.sharefair.dto.ListingMapper;
 import com.sharefair.dto.UpdateUserRequest;
 import com.sharefair.dto.UserDto;
-import com.sharefair.entity.Listing;
+import com.sharefair.dto.UserMapper;
 import com.sharefair.entity.User;
 import com.sharefair.exception.ResourceNotFoundException;
 import com.sharefair.repository.ListingRepository;
@@ -28,7 +29,7 @@ public class UserService {
     public UserDto getUserById(String id) {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found"));
-        return toDto(user);
+        return UserMapper.toDto(user);
     }
 
     public UserDto updateUser(String id, UpdateUserRequest request, String principalId) {
@@ -50,7 +51,7 @@ public class UserService {
         }
 
         User updated = userRepository.update(user);
-        return toDto(updated);
+        return UserMapper.toDto(updated);
     }
 
     public List<ListingDto> getUserListings(String userId) {
@@ -58,41 +59,7 @@ public class UserService {
                 .orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
         return listingRepository.findByOwnerId(userId).stream()
-                .map(this::toListingDto)
+                .map(ListingMapper::toDto)
                 .collect(Collectors.toList());
-    }
-
-    private UserDto toDto(User user) {
-        return UserDto.builder()
-                .id(user.getId())
-                .email(user.getEmail())
-                .name(user.getName())
-                .avatar(user.getAvatar())
-                .neighborhood(user.getNeighborhood())
-                .trustScore(user.getTrustScore())
-                .carbonSaved(user.getCarbonSaved())
-                .createdAt(user.getCreatedAt())
-                .verificationStatus(user.getVerificationStatus())
-                .build();
-    }
-
-    private ListingDto toListingDto(Listing listing) {
-        ListingDto dto = new ListingDto();
-        dto.setId(listing.getId());
-        dto.setTitle(listing.getTitle());
-        dto.setDescription(listing.getDescription());
-        dto.setCategory(listing.getCategory());
-        dto.setCondition(listing.getCondition());
-        dto.setOwnerId(listing.getOwnerId());
-        dto.setPrice(listing.getPrice());
-        dto.setPricePerDay(listing.getPricePerDay());
-        dto.setImages(listing.getImages());
-        dto.setLatitude(listing.getLatitude());
-        dto.setLongitude(listing.getLongitude());
-        dto.setNeighborhood(listing.getNeighborhood());
-        dto.setAvailable(listing.getAvailable());
-        dto.setCreatedAt(listing.getCreatedAt());
-        dto.setUpdatedAt(listing.getUpdatedAt());
-        return dto;
     }
 }

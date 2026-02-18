@@ -11,7 +11,6 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/v1/notification-preferences")
-@CrossOrigin(origins = "*")
 public class NotificationPreferenceController {
 
     private final NotificationPreferenceRepository preferenceRepository;
