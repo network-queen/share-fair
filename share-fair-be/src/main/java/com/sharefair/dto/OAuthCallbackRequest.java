@@ -10,4 +10,5 @@ import lombok.NoArgsConstructor;
 public class OAuthCallbackRequest {
     private String code;
     private String provider;
+    private String redirectUri;
 }

@@ -89,6 +89,7 @@ public class OAuthService {
 
     @SuppressWarnings("unchecked")
     private OAuthUserInfo handleGoogleCallback(String code, String redirectUri) {
+        log.info("Google token exchange with redirect_uri: [{}]", redirectUri);
         try {
             // Exchange code for token
             MultiValueMap<String, String> params = new LinkedMultiValueMap<>();

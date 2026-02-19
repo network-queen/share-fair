@@ -48,9 +48,12 @@ public class AuthController {
 
     @PostMapping("/oauth/callback")
     public ResponseEntity<ApiResponse<AuthResponse>> handleCallback(@RequestBody OAuthCallbackRequest request) {
-        log.info("Handling OAuth callback for provider: {}", request.getProvider());
+        log.info("Handling OAuth callback for provider: {}, redirectUri: [{}]",
+                request.getProvider(), request.getRedirectUri());
 
-        String redirectUri = frontendUrl + "/auth/callback";
+        String redirectUri = request.getRedirectUri() != null
+                ? request.getRedirectUri()
+                : frontendUrl + "/auth/callback";
         AuthResponse authResponse = oAuthService.handleCallback(
                 request.getProvider(),
                 request.getCode(),

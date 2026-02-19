@@ -133,7 +133,7 @@ class AuthControllerTest {
         when(oAuthService.handleCallback(eq("google"), eq("auth-code"), any()))
                 .thenReturn(authResponse);
 
-        OAuthCallbackRequest request = new OAuthCallbackRequest("auth-code", "google");
+        OAuthCallbackRequest request = new OAuthCallbackRequest("auth-code", "google", "https://localhost/auth/callback");
 
         mockMvc.perform(post("/api/v1/auth/oauth/callback")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -150,7 +150,7 @@ class AuthControllerTest {
         when(oAuthService.handleCallback(any(), any(), any()))
                 .thenThrow(new OAuthException("Failed to authenticate with Google"));
 
-        OAuthCallbackRequest request = new OAuthCallbackRequest("bad-code", "google");
+        OAuthCallbackRequest request = new OAuthCallbackRequest("bad-code", "google", "https://localhost/auth/callback");
 
         mockMvc.perform(post("/api/v1/auth/oauth/callback")
                         .contentType(MediaType.APPLICATION_JSON)

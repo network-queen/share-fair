@@ -12,6 +12,7 @@ export interface LoginResponse {
 export interface OAuthCallbackParams {
   code: string;
   provider: 'google' | 'github';
+  redirectUri: string;
 }
 
 class AuthService {
@@ -36,6 +37,7 @@ class AuthService {
     const response = await api.post<LoginResponse>('/auth/oauth/callback', {
       code: params.code,
       provider: params.provider,
+      redirectUri: params.redirectUri,
     });
     const data = response.data;
     if (data.accessToken) {

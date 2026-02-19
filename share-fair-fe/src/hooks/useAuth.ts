@@ -15,6 +15,7 @@ export const useAuth = () => {
       const response = await authService.handleOAuthCallback({
         code,
         provider: provider as 'google' | 'github',
+        redirectUri: `${window.location.origin}/auth/callback`,
       });
       dispatch(setUser(response.user));
     } catch (error: unknown) {
