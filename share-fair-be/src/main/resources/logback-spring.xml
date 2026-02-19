@@ -20,24 +20,13 @@
     </springProfile>
 
     <!-- ======================== -->
-    <!-- Docker: JSON console + Logstash TCP -->
+    <!-- Docker: JSON console (Promtail reads Docker stdout) -->
     <!-- ======================== -->
     <springProfile name="docker">
-        <!-- JSON stdout for Docker log drivers -->
         <appender name="JSON_CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
             <encoder class="net.logstash.logback.encoder.LogstashEncoder">
                 <includeCallerData>false</includeCallerData>
             </encoder>
-        </appender>
-
-        <!-- TCP to Logstash (async, non-blocking) -->
-        <appender name="LOGSTASH" class="net.logstash.logback.appender.LogstashTcpSocketAppender">
-            <destination>logstash:5000</destination>
-            <encoder class="net.logstash.logback.encoder.LogstashEncoder"/>
-            <!-- Reconnect if Logstash is temporarily down -->
-            <reconnectionDelay>5 seconds</reconnectionDelay>
-            <!-- Drop logs rather than block the app if queue is full -->
-            <ringBufferSize>8192</ringBufferSize>
         </appender>
 
         <logger name="com.sharefair" level="DEBUG"/>
@@ -45,7 +34,6 @@
 
         <root level="INFO">
             <appender-ref ref="JSON_CONSOLE"/>
-            <appender-ref ref="LOGSTASH"/>
         </root>
     </springProfile>
 
