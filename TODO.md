@@ -95,10 +95,10 @@ _(none)_
 - [ ] User messaging / chat system
 - [ ] Real-time notifications (WebSockets)
 - [ ] Elasticsearch for advanced search
-- [ ] Mobile apps (React Native)
+- [x] Mobile apps (React Native)
 - [ ] AI-powered recommendations
-- [ ] Sustainability reports
-- [ ] Dispute resolution system
+- [x] Sustainability reports
+- [x] Dispute resolution system
 - [ ] Insurance integration
 - [ ] Additional languages (German, Polish)
 - [ ] RTL language support
