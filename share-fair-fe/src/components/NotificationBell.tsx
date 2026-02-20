@@ -2,6 +2,7 @@ import { useEffect, useState, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import notificationService from '../services/notificationService'
+import { useRealtimeNotifications } from '../hooks/useRealtimeNotifications'
 import type { NotificationItem } from '../types'
 
 const NotificationBell = () => {
@@ -13,15 +14,27 @@ const NotificationBell = () => {
   const [loading, setLoading] = useState(false)
   const dropdownRef = useRef<HTMLDivElement>(null)
 
+  const token = localStorage.getItem('accessToken')
+
   const fetchUnreadCount = () => {
     notificationService.getUnreadCount()
       .then(setUnreadCount)
       .catch(() => {})
   }
 
+  // Real-time WebSocket: increment badge and prepend notification on arrival
+  useRealtimeNotifications({
+    token,
+    onNotification: (notification) => {
+      setUnreadCount((c) => c + 1)
+      setNotifications((prev) => [notification, ...prev].slice(0, 20))
+    },
+  })
+
+  // Polling fallback every 60 s (longer interval since WS is primary)
   useEffect(() => {
     fetchUnreadCount()
-    const interval = setInterval(fetchUnreadCount, 30000)
+    const interval = setInterval(fetchUnreadCount, 60000)
     return () => clearInterval(interval)
   }, [])
 

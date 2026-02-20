@@ -1,10 +1,25 @@
+import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Link } from 'react-router-dom'
 import CarbonLeaderboard from '../components/CarbonLeaderboard'
+import ListingCard from '../components/ListingCard'
 import SEO from '../components/SEO'
+import { useAuth } from '../hooks/useAuth'
+import recommendationService from '../services/recommendationService'
+import type { Listing } from '../types'
 
 const HomePage = () => {
   const { t } = useTranslation()
+  const { isAuthenticated } = useAuth()
+  const [recommended, setRecommended] = useState<Listing[]>([])
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      recommendationService.getPersonalized(8)
+        .then(setRecommended)
+        .catch(() => {})
+    }
+  }, [isAuthenticated])
 
   return (
     <div className="space-y-12">
@@ -46,6 +61,18 @@ const HomePage = () => {
           </div>
         </div>
       </section>
+
+      {/* AI Recommendations (authenticated users only) */}
+      {isAuthenticated && recommended.length > 0 && (
+        <section>
+          <h2 className="text-3xl font-bold mb-6 text-center">{t('recommendations.forYou')}</h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            {recommended.map((listing) => (
+              <ListingCard key={listing.id} listing={listing} />
+            ))}
+          </div>
+        </section>
+      )}
 
       {/* Community Impact */}
       <section>

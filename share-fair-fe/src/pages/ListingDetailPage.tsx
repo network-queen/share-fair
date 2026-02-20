@@ -6,14 +6,16 @@ import { useAuth } from '../hooks/useAuth'
 import { fetchListing } from '../store/slices/listingSlice'
 import { createTransaction } from '../store/slices/transactionSlice'
 import ListingMap from '../components/ListingMap'
+import ListingCard from '../components/ListingCard'
 import ReviewList from '../components/ReviewList'
 import TrustBadge from '../components/TrustBadge'
 import SEO from '../components/SEO'
 import listingService from '../services/listingService'
 import reviewService from '../services/reviewService'
 import trustScoreService from '../services/trustScoreService'
+import recommendationService from '../services/recommendationService'
 import type { ReviewResponse } from '../services/reviewService'
-import type { TrustScore } from '../types'
+import type { TrustScore, Listing } from '../types'
 
 const ListingDetailPage = () => {
   const { t } = useTranslation()
@@ -33,6 +35,7 @@ const ListingDetailPage = () => {
   const [ownerTrust, setOwnerTrust] = useState<TrustScore | null>(null)
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
   const [deleting, setDeleting] = useState(false)
+  const [similarListings, setSimilarListings] = useState<Listing[]>([])
 
   useEffect(() => {
     if (id) {
@@ -52,7 +55,12 @@ const ListingDetailPage = () => {
         .then(setOwnerTrust)
         .catch(() => {})
     }
-  }, [currentListing?.ownerId])
+    if (currentListing?.id) {
+      recommendationService.getSimilar(currentListing.id, 4)
+        .then(setSimilarListings)
+        .catch(() => {})
+    }
+  }, [currentListing?.ownerId, currentListing?.id])
 
   const handleRent = async () => {
     if (!startDate || !endDate) {
@@ -312,6 +320,18 @@ const ListingDetailPage = () => {
           </button>
         )}
       </div>
+
+      {/* Similar Listings */}
+      {similarListings.length > 0 && (
+        <div className="mt-12">
+          <h2 className="text-2xl font-bold mb-6">{t('recommendations.similar')}</h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            {similarListings.map((listing) => (
+              <ListingCard key={listing.id} listing={listing} />
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   )
 }

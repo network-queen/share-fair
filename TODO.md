@@ -93,10 +93,10 @@ _(none)_
 
 ### Future / Post-MVP
 - [ ] User messaging / chat system
-- [ ] Real-time notifications (WebSockets)
+- [x] Real-time notifications (WebSockets)
 - [ ] Elasticsearch for advanced search
 - [x] Mobile apps (React Native)
-- [ ] AI-powered recommendations
+- [x] AI-powered recommendations
 - [x] Sustainability reports
 - [x] Dispute resolution system
 - [ ] Insurance integration

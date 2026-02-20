@@ -332,5 +332,10 @@
     "byCategory": "Carbon Saved by Category",
     "topContributors": "Top Contributors",
     "rank": "Community Rank"
+  },
+  "recommendations": {
+    "forYou": "Recommended for You",
+    "similar": "Similar Listings",
+    "basedOnHistory": "Based on your rental history"
   }
 }

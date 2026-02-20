@@ -48,6 +48,12 @@
             <artifactId>spring-boot-starter-web</artifactId>
         </dependency>
 
+        <!-- WebSocket (STOMP over SockJS for real-time notifications) -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-websocket</artifactId>
+        </dependency>
+
         <!-- Actuator for health checks and metrics -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -57,7 +63,7 @@
         <!-- Prometheus metrics via Micrometer -->
         <dependency>
             <groupId>io.micrometer</groupId>
-            <artifactId>micrometer-registry-prometheus</artifactId>
+            <artifactId>micrometer-registry-</artifactId>
         </dependency>
 
         <!-- Security -->

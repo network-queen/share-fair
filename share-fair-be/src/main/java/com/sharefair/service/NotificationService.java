@@ -1,11 +1,13 @@
 package com.sharefair.service;
 
+import com.sharefair.dto.NotificationDto;
 import com.sharefair.entity.Notification;
 import com.sharefair.entity.NotificationPreference;
 import com.sharefair.entity.User;
 import com.sharefair.repository.NotificationPreferenceRepository;
 import com.sharefair.repository.NotificationRepository;
 import com.sharefair.repository.UserRepository;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -16,15 +18,18 @@ public class NotificationService {
     private final NotificationPreferenceRepository preferenceRepository;
     private final UserRepository userRepository;
     private final EmailService emailService;
+    private final SimpMessagingTemplate messagingTemplate;
 
     public NotificationService(NotificationRepository notificationRepository,
                                NotificationPreferenceRepository preferenceRepository,
                                UserRepository userRepository,
-                               EmailService emailService) {
+                               EmailService emailService,
+                               SimpMessagingTemplate messagingTemplate) {
         this.notificationRepository = notificationRepository;
         this.preferenceRepository = preferenceRepository;
         this.userRepository = userRepository;
         this.emailService = emailService;
+        this.messagingTemplate = messagingTemplate;
     }
 
     public List<Notification> getUserNotifications(String userId, int limit, int offset) {
@@ -55,7 +60,7 @@ public class NotificationService {
                     .referenceId(transactionId)
                     .referenceType("TRANSACTION")
                     .build();
-            notificationRepository.save(notification);
+            saveAndPush(notification);
         }
 
         if (pref.getEmailTransactions()) {
@@ -80,7 +85,7 @@ public class NotificationService {
                     .referenceId(transactionId)
                     .referenceType("TRANSACTION")
                     .build();
-            notificationRepository.save(notification);
+            saveAndPush(notification);
         }
 
         if (pref.getEmailTransactions()) {
@@ -109,7 +114,7 @@ public class NotificationService {
                     .referenceId(transactionId)
                     .referenceType("TRANSACTION")
                     .build();
-            notificationRepository.save(notification);
+            saveAndPush(notification);
         }
 
         if (pref.getEmailReviews()) {
@@ -133,7 +138,7 @@ public class NotificationService {
                     .referenceId(transactionId)
                     .referenceType("TRANSACTION")
                     .build();
-            notificationRepository.save(notification);
+            saveAndPush(notification);
         }
     }
 
@@ -148,7 +153,7 @@ public class NotificationService {
                     .referenceId(transactionId)
                     .referenceType("TRANSACTION")
                     .build();
-            notificationRepository.save(notification);
+            saveAndPush(notification);
         }
     }
 
@@ -157,6 +162,22 @@ public class NotificationService {
         if (user != null && user.getEmail() != null) {
             emailService.sendWelcomeEmail(user.getEmail(), user.getName());
         }
+    }
+
+    private void saveAndPush(Notification notification) {
+        notificationRepository.save(notification);
+        NotificationDto dto = NotificationDto.builder()
+                .id(notification.getId())
+                .userId(notification.getUserId())
+                .type(notification.getType())
+                .title(notification.getTitle())
+                .message(notification.getMessage())
+                .referenceId(notification.getReferenceId())
+                .referenceType(notification.getReferenceType())
+                .isRead(false)
+                .createdAt(notification.getCreatedAt())
+                .build();
+        messagingTemplate.convertAndSendToUser(notification.getUserId(), "/queue/notifications", dto);
     }
 
     private NotificationPreference getPreferences(String userId) {
