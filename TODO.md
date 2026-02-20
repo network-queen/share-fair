@@ -96,10 +96,10 @@ _(none)_
 - [ ] Real-time notifications (WebSockets)
 - [ ] Elasticsearch for advanced search
 - [x] Mobile apps (React Native)
-- [x] AI-powered recommendations
+- [ ] AI-powered recommendations
 - [x] Sustainability reports
 - [x] Dispute resolution system
-- [x] Insurance integration
+- [ ] Insurance integration
 - [ ] Additional languages (German, Polish)
 - [ ] RTL language support
 - [ ] GraphQL gateway
