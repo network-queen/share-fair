@@ -18,6 +18,7 @@ import MyTransactionsPage from './pages/MyTransactionsPage'
 import TransactionDetailPage from './pages/TransactionDetailPage'
 import PaymentReturnPage from './pages/PaymentReturnPage'
 import EditListingPage from './pages/EditListingPage'
+import SustainabilityPage from './pages/SustainabilityPage'
 import NotFoundPage from './pages/NotFoundPage'
 
 // Components - Will be created in next iteration
@@ -47,6 +48,7 @@ function App() {
           <Route path="/privacy" element={<PrivacyPolicyPage />} />
           <Route path="/terms" element={<TermsOfServicePage />} />
           <Route path="/about" element={<AboutPage />} />
+          <Route path="/sustainability" element={<SustainabilityPage />} />
 
           {/* Protected Routes */}
           <Route

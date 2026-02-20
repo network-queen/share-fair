@@ -122,6 +122,36 @@ public class NotificationService {
         }
     }
 
+    public void notifyDisputeFiled(String userId, String transactionId) {
+        NotificationPreference pref = getPreferences(userId);
+        if (pref.getInAppTransactions()) {
+            Notification notification = Notification.builder()
+                    .userId(userId)
+                    .type("DISPUTE_FILED")
+                    .title("Dispute filed")
+                    .message("A dispute has been filed for your transaction. Our team will review it shortly.")
+                    .referenceId(transactionId)
+                    .referenceType("TRANSACTION")
+                    .build();
+            notificationRepository.save(notification);
+        }
+    }
+
+    public void notifyDisputeResolved(String userId, String resolution, String transactionId) {
+        NotificationPreference pref = getPreferences(userId);
+        if (pref.getInAppTransactions()) {
+            Notification notification = Notification.builder()
+                    .userId(userId)
+                    .type("DISPUTE_RESOLVED")
+                    .title("Dispute resolved")
+                    .message("Your dispute has been resolved: " + resolution)
+                    .referenceId(transactionId)
+                    .referenceType("TRANSACTION")
+                    .build();
+            notificationRepository.save(notification);
+        }
+    }
+
     public void sendWelcomeEmail(String userId) {
         User user = userRepository.findById(userId).orElse(null);
         if (user != null && user.getEmail() != null) {

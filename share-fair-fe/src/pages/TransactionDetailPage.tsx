@@ -6,8 +6,10 @@ import { useAuth } from '../hooks/useAuth'
 import { fetchTransaction, updateTransactionStatus } from '../store/slices/transactionSlice'
 import PaymentForm from '../components/PaymentForm'
 import ReviewForm from '../components/ReviewForm'
+import DisputeForm from '../components/DisputeForm'
 import SEO from '../components/SEO'
 import reviewService from '../services/reviewService'
+import disputeService, { type DisputeResponse } from '../services/disputeService'
 import type { ReviewResponse } from '../services/reviewService'
 import { getStatusColor } from '../utils/transactionUtils'
 
@@ -23,6 +25,8 @@ const TransactionDetailPage = () => {
   const [showReviewForm, setShowReviewForm] = useState(false)
   const [existingReview, setExistingReview] = useState<ReviewResponse | null>(null)
   const [reviewChecked, setReviewChecked] = useState(false)
+  const [showDisputeForm, setShowDisputeForm] = useState(false)
+  const [existingDispute, setExistingDispute] = useState<DisputeResponse | null>(null)
 
   useEffect(() => {
     if (id) {
@@ -38,6 +42,9 @@ const TransactionDetailPage = () => {
           setReviewChecked(true)
         })
         .catch(() => setReviewChecked(true))
+    }
+    if (currentTransaction?.status === 'DISPUTED' && id) {
+      disputeService.getDisputeByTransaction(id).then(setExistingDispute)
     }
   }, [currentTransaction?.status, id])
 
@@ -214,7 +221,7 @@ const TransactionDetailPage = () => {
                 {t('transaction.complete')}
               </button>
               <button
-                onClick={() => handleStatusUpdate('DISPUTED')}
+                onClick={() => setShowDisputeForm(true)}
                 className="px-6 py-3 bg-red-100 dark:bg-red-900/30 text-red-700 font-semibold rounded-lg hover:bg-red-200 dark:hover:bg-red-900/50"
               >
                 {t('transaction.dispute')}
@@ -222,6 +229,46 @@ const TransactionDetailPage = () => {
             </>
           )}
         </div>
+
+        {/* Dispute Form */}
+        {showDisputeForm && id && (
+          <div className="border-t dark:border-gray-700 pt-6">
+            <DisputeForm
+              transactionId={id}
+              onSubmitted={(dispute) => {
+                setExistingDispute(dispute)
+                setShowDisputeForm(false)
+                dispatch(fetchTransaction(id))
+              }}
+              onCancel={() => setShowDisputeForm(false)}
+            />
+          </div>
+        )}
+
+        {/* Dispute Status */}
+        {tx.status === 'DISPUTED' && existingDispute && (
+          <div className="border-t dark:border-gray-700 pt-6">
+            <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4 space-y-2">
+              <p className="font-bold text-red-700 dark:text-red-400">⚠️ {t('dispute.activeDispute')}</p>
+              <p className="text-sm text-gray-700 dark:text-gray-300">
+                <span className="font-medium">{t('dispute.reason')}:</span>{' '}
+                {t(`dispute.reason.${existingDispute.reason}`)}
+              </p>
+              {existingDispute.details && (
+                <p className="text-sm text-gray-600 dark:text-gray-400">{existingDispute.details}</p>
+              )}
+              <p className="text-sm">
+                <span className="font-medium">{t('dispute.status')}:</span>{' '}
+                <span className="text-red-600 dark:text-red-400 font-semibold">{existingDispute.status}</span>
+              </p>
+              {existingDispute.resolution && (
+                <p className="text-sm text-gray-700 dark:text-gray-300">
+                  <span className="font-medium">{t('dispute.resolution')}:</span> {existingDispute.resolution}
+                </p>
+              )}
+            </div>
+          </div>
+        )}
 
         {/* Review Section */}
         {tx.status === 'COMPLETED' && reviewChecked && (

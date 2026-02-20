@@ -297,5 +297,40 @@
     "trustText": "Through our rating system and community-driven approach, we foster neighborhood connections that go beyond simple transactions.",
     "whyTitle": "Why It Matters",
     "whyText": "For every drill shared, one less drill is manufactured, packaged, and shipped across the ocean. Together, we can build a future where we consume less and share more."
+  },
+  "dispute": {
+    "fileDispute": "File a Dispute",
+    "description": "Disputes are reviewed by our team within 2 business days. Please provide as much detail as possible.",
+    "activeDispute": "Dispute In Progress",
+    "reason": "Reason",
+    "details": "Details",
+    "detailsPlaceholder": "Describe what happened in detail...",
+    "status": "Status",
+    "resolution": "Resolution",
+    "submit": "Submit Dispute",
+    "reason": {
+      "ITEM_NOT_RETURNED": "Item not returned",
+      "ITEM_DAMAGED": "Item was damaged",
+      "NO_SHOW": "No-show / failed pickup",
+      "PAYMENT_ISSUE": "Payment issue",
+      "MISREPRESENTATION": "Item misrepresented",
+      "OTHER": "Other"
+    }
+  },
+  "sustainability": {
+    "title": "Sustainability Report",
+    "subtitle": "Track the collective environmental impact of our sharing community.",
+    "view": {
+      "community": "Community",
+      "personal": "My Impact"
+    },
+    "totalCarbonSaved": "Total CO₂ Saved",
+    "totalTransactions": "Completed Transactions",
+    "activeUsers": "Active Contributors",
+    "avgPerTransaction": "Avg CO₂ per Transaction",
+    "monthlyTrend": "Monthly CO₂ Savings Trend",
+    "byCategory": "Carbon Saved by Category",
+    "topContributors": "Top Contributors",
+    "rank": "Community Rank"
   }
 }
