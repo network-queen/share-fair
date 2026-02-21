@@ -122,23 +122,28 @@ spec:
             # Ollama (AI semantic search)
             - name: SPRING_AI_OLLAMA_BASE_URL
               value: "http://ollama:11434"
-            # Email
-            - name: SPRING_MAIL_HOST
+            # MinIO public URL (for serving images to browsers)
+            # In production: set to https://your-domain.com/minio or your CDN
+            # For local K8s: use kubectl port-forward svc/minio 9000:9000 → http://localhost:9000
+            - name: MINIO_PUBLIC_URL
+              value: "http://minio:9000"
+            # Email — env var names must match ${MAIL_*} placeholders in application.yml
+            - name: MAIL_HOST
               valueFrom:
                 secretKeyRef:
                   name: app-secrets
                   key: mail-host
-            - name: SPRING_MAIL_PORT
+            - name: MAIL_PORT
               valueFrom:
                 secretKeyRef:
                   name: app-secrets
                   key: mail-port
-            - name: SPRING_MAIL_USERNAME
+            - name: MAIL_USERNAME
               valueFrom:
                 secretKeyRef:
                   name: app-secrets
                   key: mail-username
-            - name: SPRING_MAIL_PASSWORD
+            - name: MAIL_PASSWORD
               valueFrom:
                 secretKeyRef:
                   name: app-secrets
