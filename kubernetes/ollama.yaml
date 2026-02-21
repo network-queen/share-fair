@@ -1,0 +1,100 @@
+# Ollama — local LLM for semantic search embeddings (all-minilm:l6-v2)
+# Note: Model download happens at first startup (~90 MB). Subsequent starts use cached volume.
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ollama
+  namespace: share-fair
+  labels:
+    app: ollama
+    app.kubernetes.io/part-of: share-fair
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ollama
+  template:
+    metadata:
+      labels:
+        app: ollama
+        app.kubernetes.io/part-of: share-fair
+    spec:
+      # Ollama model download can take time — generous startup period
+      terminationGracePeriodSeconds: 30
+      initContainers:
+        # Pull the embedding model on first start
+        - name: pull-model
+          image: ollama/ollama:latest
+          command:
+            - sh
+            - -c
+            - |
+              ollama serve &
+              sleep 5
+              ollama pull all-minilm:l6-v2
+              kill %1
+          volumeMounts:
+            - name: ollama-data
+              mountPath: /root/.ollama
+          resources:
+            requests:
+              memory: "512Mi"
+              cpu: "500m"
+            limits:
+              memory: "2Gi"
+              cpu: "2000m"
+      containers:
+        - name: ollama
+          image: ollama/ollama:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: ollama
+              containerPort: 11434
+          volumeMounts:
+            - name: ollama-data
+              mountPath: /root/.ollama
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 11434
+            initialDelaySeconds: 60
+            periodSeconds: 30
+            timeoutSeconds: 10
+            failureThreshold: 5
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 11434
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            timeoutSeconds: 5
+          resources:
+            requests:
+              memory: "1Gi"
+              cpu: "500m"
+            limits:
+              memory: "4Gi"
+              cpu: "4000m"
+      volumes:
+        - name: ollama-data
+          persistentVolumeClaim:
+            claimName: ollama-data
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: ollama
+  namespace: share-fair
+  labels:
+    app: ollama
+    app.kubernetes.io/part-of: share-fair
+spec:
+  type: ClusterIP
+  selector:
+    app: ollama
+  ports:
+    - name: ollama
+      port: 11434
+      targetPort: 11434

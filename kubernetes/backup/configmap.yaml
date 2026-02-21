@@ -1,0 +1,171 @@
+# Backup and restore scripts stored as a ConfigMap
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: backup-scripts
+  namespace: share-fair
+  labels:
+    app: backup
+    app.kubernetes.io/part-of: share-fair
+data:
+  # ── backup.sh ────────────────────────────────────────────────────────────────
+  # Dumps the PostgreSQL database, compresses it, and uploads to MinIO.
+  # Retention: 7 daily backups, 4 weekly backups (kept on Sundays).
+  backup.sh: |
+    #!/bin/bash
+    set -euo pipefail
+
+    # ── Configuration (injected via env vars) ──────────────────────────────────
+    POSTGRES_HOST="${POSTGRES_HOST:-postgres}"
+    POSTGRES_PORT="${POSTGRES_PORT:-5432}"
+    POSTGRES_USER="${POSTGRES_USER}"
+    POSTGRES_PASSWORD="${POSTGRES_PASSWORD}"
+    POSTGRES_DB="${POSTGRES_DB}"
+    MINIO_ENDPOINT="${MINIO_ENDPOINT:-http://minio:9000}"
+    MINIO_ACCESS_KEY="${MINIO_ACCESS_KEY}"
+    MINIO_SECRET_KEY="${MINIO_SECRET_KEY}"
+    MINIO_BUCKET="${MINIO_BUCKET:-sharefair-backups}"
+    DAILY_RETAIN="${DAILY_RETAIN:-7}"
+    WEEKLY_RETAIN="${WEEKLY_RETAIN:-4}"
+
+    DATE=$(date -u +%Y%m%d_%H%M%S)
+    DAY_OF_WEEK=$(date -u +%u)   # 1=Mon … 7=Sun
+    BACKUP_FILE="sharefair_${DATE}.dump.gz"
+    TEMP_FILE="/tmp/${BACKUP_FILE}"
+
+    log() { echo "[$(date -u +%Y-%m-%dT%H:%M:%SZ)] $*"; }
+
+    log "=== Share Fair PostgreSQL Backup ==="
+    log "Target: ${POSTGRES_USER}@${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB}"
+    log "Backup file: ${BACKUP_FILE}"
+
+    # ── Install MinIO client if missing ──────────────────────────────────────
+    if ! command -v mc &>/dev/null; then
+      log "Installing MinIO client..."
+      curl -fsSL "https://dl.min.io/client/mc/release/linux-amd64/mc" -o /usr/local/bin/mc
+      chmod +x /usr/local/bin/mc
+    fi
+
+    # ── Create dump ──────────────────────────────────────────────────────────
+    log "Running pg_dump..."
+    PGPASSWORD="${POSTGRES_PASSWORD}" pg_dump \
+      --host="${POSTGRES_HOST}" \
+      --port="${POSTGRES_PORT}" \
+      --username="${POSTGRES_USER}" \
+      --dbname="${POSTGRES_DB}" \
+      --format=custom \
+      --no-password \
+      | gzip -9 > "${TEMP_FILE}"
+
+    BACKUP_SIZE=$(du -sh "${TEMP_FILE}" | cut -f1)
+    log "Dump complete: ${BACKUP_SIZE}"
+
+    # ── Configure mc ─────────────────────────────────────────────────────────
+    mc alias set backup "${MINIO_ENDPOINT}" "${MINIO_ACCESS_KEY}" "${MINIO_SECRET_KEY}" \
+      --insecure >/dev/null 2>&1
+
+    # Create buckets if they don't exist
+    mc mb --ignore-existing "backup/${MINIO_BUCKET}/daily"  --insecure >/dev/null 2>&1 || true
+    mc mb --ignore-existing "backup/${MINIO_BUCKET}/weekly" --insecure >/dev/null 2>&1 || true
+
+    # ── Upload daily backup ───────────────────────────────────────────────────
+    log "Uploading daily backup..."
+    mc cp "${TEMP_FILE}" "backup/${MINIO_BUCKET}/daily/${BACKUP_FILE}" --insecure
+    log "Daily backup uploaded: ${MINIO_ENDPOINT}/${MINIO_BUCKET}/daily/${BACKUP_FILE}"
+
+    # ── Upload weekly backup (Sunday only) ────────────────────────────────────
+    if [ "${DAY_OF_WEEK}" = "7" ]; then
+      log "Uploading weekly backup (Sunday)..."
+      mc cp "${TEMP_FILE}" "backup/${MINIO_BUCKET}/weekly/${BACKUP_FILE}" --insecure
+      log "Weekly backup uploaded"
+    fi
+
+    # ── Cleanup temp file ─────────────────────────────────────────────────────
+    rm -f "${TEMP_FILE}"
+
+    # ── Apply retention policy ────────────────────────────────────────────────
+    apply_retention() {
+      local prefix="$1"
+      local keep="$2"
+      log "Applying retention (${prefix}): keeping last ${keep} backups..."
+      mc ls "backup/${MINIO_BUCKET}/${prefix}/" --insecure 2>/dev/null \
+        | awk '{print $NF}' \
+        | sort -r \
+        | awk "NR > ${keep} {print}" \
+        | while IFS= read -r old_file; do
+            [ -n "${old_file}" ] || continue
+            mc rm "backup/${MINIO_BUCKET}/${prefix}/${old_file}" --insecure \
+              && log "  Removed: ${old_file}"
+          done
+    }
+
+    apply_retention "daily"  "${DAILY_RETAIN}"
+    apply_retention "weekly" "${WEEKLY_RETAIN}"
+
+    log "=== Backup completed successfully: ${BACKUP_FILE} ==="
+
+  # ── restore.sh ───────────────────────────────────────────────────────────────
+  # Downloads a backup from MinIO and restores it into PostgreSQL.
+  # Set BACKUP_FILE env var to the filename (e.g. sharefair_20260221_020000.dump.gz).
+  # If BACKUP_FILE is unset, lists available backups and exits.
+  restore.sh: |
+    #!/bin/bash
+    set -euo pipefail
+
+    POSTGRES_HOST="${POSTGRES_HOST:-postgres}"
+    POSTGRES_PORT="${POSTGRES_PORT:-5432}"
+    POSTGRES_USER="${POSTGRES_USER}"
+    POSTGRES_PASSWORD="${POSTGRES_PASSWORD}"
+    POSTGRES_DB="${POSTGRES_DB}"
+    MINIO_ENDPOINT="${MINIO_ENDPOINT:-http://minio:9000}"
+    MINIO_ACCESS_KEY="${MINIO_ACCESS_KEY}"
+    MINIO_SECRET_KEY="${MINIO_SECRET_KEY}"
+    MINIO_BUCKET="${MINIO_BUCKET:-sharefair-backups}"
+    BACKUP_FILE="${BACKUP_FILE:-}"
+    RESTORE_PATH="${RESTORE_PATH:-daily}"
+
+    log() { echo "[$(date -u +%Y-%m-%dT%H:%M:%SZ)] $*"; }
+
+    # ── Install MinIO client if missing ──────────────────────────────────────
+    if ! command -v mc &>/dev/null; then
+      log "Installing MinIO client..."
+      curl -fsSL "https://dl.min.io/client/mc/release/linux-amd64/mc" -o /usr/local/bin/mc
+      chmod +x /usr/local/bin/mc
+    fi
+
+    mc alias set backup "${MINIO_ENDPOINT}" "${MINIO_ACCESS_KEY}" "${MINIO_SECRET_KEY}" \
+      --insecure >/dev/null 2>&1
+
+    # ── List backups if no file specified ─────────────────────────────────────
+    if [ -z "${BACKUP_FILE}" ]; then
+      log "No BACKUP_FILE specified. Available daily backups:"
+      mc ls "backup/${MINIO_BUCKET}/daily/" --insecure 2>/dev/null
+      echo ""
+      log "Set BACKUP_FILE=<filename> to restore a specific backup."
+      exit 1
+    fi
+
+    TEMP_FILE="/tmp/${BACKUP_FILE}"
+
+    log "=== Share Fair PostgreSQL Restore ==="
+    log "Downloading: ${MINIO_ENDPOINT}/${MINIO_BUCKET}/${RESTORE_PATH}/${BACKUP_FILE}"
+
+    mc cp "backup/${MINIO_BUCKET}/${RESTORE_PATH}/${BACKUP_FILE}" "${TEMP_FILE}" --insecure
+    log "Download complete: $(du -sh "${TEMP_FILE}" | cut -f1)"
+
+    log "Restoring into ${POSTGRES_USER}@${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB}..."
+    log "WARNING: This will DROP and recreate all objects in the database."
+
+    gunzip -c "${TEMP_FILE}" | PGPASSWORD="${POSTGRES_PASSWORD}" pg_restore \
+      --host="${POSTGRES_HOST}" \
+      --port="${POSTGRES_PORT}" \
+      --username="${POSTGRES_USER}" \
+      --dbname="${POSTGRES_DB}" \
+      --clean \
+      --if-exists \
+      --no-password \
+      --verbose
+
+    rm -f "${TEMP_FILE}"
+    log "=== Restore completed successfully ==="

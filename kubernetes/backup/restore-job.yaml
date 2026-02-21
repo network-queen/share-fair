@@ -1,0 +1,105 @@
+# On-demand PostgreSQL Restore Job
+#
+# Usage:
+#   1. List available backups first (leave BACKUP_FILE empty):
+#      kubectl apply -f restore-job.yaml -n share-fair
+#      kubectl logs -l job-name=postgres-restore -n share-fair -f
+#
+#   2. Set BACKUP_FILE to the filename you want to restore, then re-apply:
+#      Edit this file: set BACKUP_FILE value to e.g. "sharefair_20260221_020000.dump.gz"
+#      kubectl delete job postgres-restore -n share-fair --ignore-not-found
+#      kubectl apply -f restore-job.yaml -n share-fair
+#      kubectl logs -l job-name=postgres-restore -n share-fair -f
+#
+# WARNING: Restore uses --clean --if-exists which DROPS all existing objects
+# before recreating them from the backup. Run this only during maintenance windows.
+
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: postgres-restore
+  namespace: share-fair
+  labels:
+    app: backup
+    app.kubernetes.io/part-of: share-fair
+spec:
+  backoffLimit: 0
+  activeDeadlineSeconds: 7200  # 2 hours max
+  template:
+    metadata:
+      labels:
+        app: backup
+        job-name: postgres-restore
+        app.kubernetes.io/part-of: share-fair
+    spec:
+      restartPolicy: Never
+      containers:
+        - name: restore
+          image: postgres:15-alpine
+          imagePullPolicy: IfNotPresent
+          command:
+            - /bin/sh
+            - -c
+            - |
+              apk add --no-cache curl && /scripts/restore.sh
+          env:
+            # Database connection
+            - name: POSTGRES_HOST
+              value: "postgres"
+            - name: POSTGRES_PORT
+              value: "5432"
+            - name: POSTGRES_DB
+              valueFrom:
+                secretKeyRef:
+                  name: app-secrets
+                  key: postgres-db
+            - name: POSTGRES_USER
+              valueFrom:
+                secretKeyRef:
+                  name: app-secrets
+                  key: postgres-user
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: app-secrets
+                  key: postgres-password
+            # MinIO connection
+            - name: MINIO_ENDPOINT
+              value: "http://minio:9000"
+            - name: MINIO_ACCESS_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: minio-secrets
+                  key: access-key
+            - name: MINIO_SECRET_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: minio-secrets
+                  key: secret-key
+            - name: MINIO_BUCKET
+              value: "sharefair-backups"
+            # ── Set BACKUP_FILE to restore a specific backup ──────────────────
+            # Leave empty to list available backups.
+            # Example: "sharefair_20260221_020000.dump.gz"
+            - name: BACKUP_FILE
+              value: ""
+            # RESTORE_PATH: "daily" or "weekly"
+            - name: RESTORE_PATH
+              value: "daily"
+          volumeMounts:
+            - name: scripts
+              mountPath: /scripts
+              readOnly: true
+          resources:
+            requests:
+              memory: "64Mi"
+              cpu: "100m"
+            limits:
+              memory: "512Mi"
+              cpu: "1000m"
+      volumes:
+        - name: scripts
+          configMap:
+            name: backup-scripts
+            defaultMode: 0755

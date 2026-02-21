@@ -1,0 +1,69 @@
+# Kubernetes Ingress — routes external HTTPS traffic to the nginx proxy
+#
+# Prerequisites:
+#   1. An Ingress Controller must be installed in your cluster, e.g.:
+#      kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/main/deploy/static/provider/cloud/deploy.yaml
+#
+#   2. For TLS, install cert-manager and create a ClusterIssuer:
+#      kubectl apply -f https://github.com/cert-manager/cert-manager/releases/latest/download/cert-manager.yaml
+#
+#   3. Replace 'your-domain.com' with your actual domain.
+#      For local/staging use, set to your LoadBalancer IP or use nip.io.
+#
+# Apply: kubectl apply -f ingress.yaml -n share-fair
+
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: share-fair
+  namespace: share-fair
+  labels:
+    app.kubernetes.io/part-of: share-fair
+  annotations:
+    # nginx ingress controller
+    nginx.ingress.kubernetes.io/proxy-body-size: "50m"
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "60"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "60"
+
+    # WebSocket support (STOMP for real-time chat + notifications)
+    nginx.ingress.kubernetes.io/proxy-http-version: "1.1"
+    nginx.ingress.kubernetes.io/proxy-set-headers: "share-fair/websocket-headers"
+
+    # TLS — cert-manager auto-provisioning (Let's Encrypt)
+    # Remove this annotation if you manage TLS manually
+    cert-manager.io/cluster-issuer: "letsencrypt-prod"
+
+    # Force HTTPS redirect
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
+spec:
+  ingressClassName: nginx
+  tls:
+    - hosts:
+        - your-domain.com
+      secretName: share-fair-tls
+  rules:
+    - host: your-domain.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: nginx
+                port:
+                  number: 80
+
+---
+# ConfigMap for custom WebSocket upgrade headers (nginx ingress)
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: websocket-headers
+  namespace: share-fair
+  labels:
+    app.kubernetes.io/part-of: share-fair
+data:
+  Upgrade: "$http_upgrade"
+  Connection: "upgrade"

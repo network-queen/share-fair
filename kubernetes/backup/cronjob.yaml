@@ -1,0 +1,100 @@
+# Daily database backup CronJob
+# Runs at 02:00 UTC every day.
+# Stores compressed pg_dump in MinIO under:
+#   sharefair-backups/daily/   (kept for 7 days)
+#   sharefair-backups/weekly/  (kept for 4 weeks, uploaded on Sundays)
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: postgres-backup
+  namespace: share-fair
+  labels:
+    app: backup
+    app.kubernetes.io/part-of: share-fair
+spec:
+  # Daily at 02:00 UTC
+  schedule: "0 2 * * *"
+  timeZone: "UTC"
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 7
+  failedJobsHistoryLimit: 3
+  startingDeadlineSeconds: 300
+  jobTemplate:
+    spec:
+      backoffLimit: 2
+      activeDeadlineSeconds: 3600  # Abort if backup takes longer than 1 hour
+      template:
+        metadata:
+          labels:
+            app: backup
+            app.kubernetes.io/part-of: share-fair
+        spec:
+          restartPolicy: OnFailure
+          containers:
+            - name: backup
+              # postgres:15-alpine provides pg_dump; script downloads mc at runtime
+              image: postgres:15-alpine
+              imagePullPolicy: IfNotPresent
+              command:
+                - /bin/sh
+                - -c
+                - |
+                  apk add --no-cache curl && /scripts/backup.sh
+              env:
+                # Database connection
+                - name: POSTGRES_HOST
+                  value: "postgres"
+                - name: POSTGRES_PORT
+                  value: "5432"
+                - name: POSTGRES_DB
+                  valueFrom:
+                    secretKeyRef:
+                      name: app-secrets
+                      key: postgres-db
+                - name: POSTGRES_USER
+                  valueFrom:
+                    secretKeyRef:
+                      name: app-secrets
+                      key: postgres-user
+                - name: POSTGRES_PASSWORD
+                  valueFrom:
+                    secretKeyRef:
+                      name: app-secrets
+                      key: postgres-password
+                # MinIO connection
+                - name: MINIO_ENDPOINT
+                  value: "http://minio:9000"
+                - name: MINIO_ACCESS_KEY
+                  valueFrom:
+                    secretKeyRef:
+                      name: minio-secrets
+                      key: access-key
+                - name: MINIO_SECRET_KEY
+                  valueFrom:
+                    secretKeyRef:
+                      name: minio-secrets
+                      key: secret-key
+                - name: MINIO_BUCKET
+                  value: "sharefair-backups"
+                # Retention settings
+                - name: DAILY_RETAIN
+                  value: "7"
+                - name: WEEKLY_RETAIN
+                  value: "4"
+              volumeMounts:
+                - name: scripts
+                  mountPath: /scripts
+                  readOnly: true
+              resources:
+                requests:
+                  memory: "64Mi"
+                  cpu: "100m"
+                limits:
+                  memory: "256Mi"
+                  cpu: "500m"
+          volumes:
+            - name: scripts
+              configMap:
+                name: backup-scripts
+                defaultMode: 0755  # Make scripts executable

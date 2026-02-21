@@ -82,10 +82,10 @@ _(none)_
 
 ### DevOps & Infrastructure (Priority: Low)
 - [ ] CI/CD pipeline (GitHub Actions)
-- [ ] Kubernetes manifests
+- [x] Kubernetes manifests
 - [ ] Redis caching for hot queries (neighborhoods, categories)
 - [ ] Production environment configuration
-- [ ] Database backup strategy
+- [x] Database backup strategy
 - [x] Monitoring (Prometheus + Grafana — Spring Boot Actuator, Micrometer, auto-provisioned Grafana datasource, scrape every 15s)
 - [x] Centralized logging (ELK stack — Elasticsearch 8.12 + Logstash + Kibana, logstash-logback-encoder, JSON structured logs via TCP)
 - [ ] Rate limiting on public endpoints

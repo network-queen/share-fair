@@ -1,0 +1,104 @@
+# Persistent Volume Claims for all stateful services.
+# Adjust storage sizes and storageClassName to match your cluster's provisioner.
+# Common storageClassName values:
+#   - standard (minikube / kind)
+#   - gp2 / gp3 (AWS EKS)
+#   - managed-premium (AKS)
+#   - standard-rwo (GKE)
+#   - longhorn (self-hosted)
+
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: postgres-data
+  namespace: share-fair
+  labels:
+    app: postgres
+    app.kubernetes.io/part-of: share-fair
+spec:
+  accessModes: [ReadWriteOnce]
+  resources:
+    requests:
+      storage: 20Gi
+  # storageClassName: standard
+
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: minio-data
+  namespace: share-fair
+  labels:
+    app: minio
+    app.kubernetes.io/part-of: share-fair
+spec:
+  accessModes: [ReadWriteOnce]
+  resources:
+    requests:
+      storage: 50Gi
+  # storageClassName: standard
+
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: ollama-data
+  namespace: share-fair
+  labels:
+    app: ollama
+    app.kubernetes.io/part-of: share-fair
+spec:
+  accessModes: [ReadWriteOnce]
+  resources:
+    requests:
+      storage: 20Gi
+  # storageClassName: standard
+
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: prometheus-data
+  namespace: share-fair
+  labels:
+    app: prometheus
+    app.kubernetes.io/part-of: share-fair
+spec:
+  accessModes: [ReadWriteOnce]
+  resources:
+    requests:
+      storage: 10Gi
+  # storageClassName: standard
+
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: grafana-data
+  namespace: share-fair
+  labels:
+    app: grafana
+    app.kubernetes.io/part-of: share-fair
+spec:
+  accessModes: [ReadWriteOnce]
+  resources:
+    requests:
+      storage: 2Gi
+  # storageClassName: standard
+
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: loki-data
+  namespace: share-fair
+  labels:
+    app: loki
+    app.kubernetes.io/part-of: share-fair
+spec:
+  accessModes: [ReadWriteOnce]
+  resources:
+    requests:
+      storage: 10Gi
+  # storageClassName: standard

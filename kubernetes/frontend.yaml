@@ -1,0 +1,138 @@
+# React SPA frontend — production nginx-served static build
+#
+# IMPORTANT: The existing share-fair-fe/Dockerfile runs a Vite dev server.
+# For Kubernetes, build a production image with a multi-stage Dockerfile:
+#
+#   FROM node:20-alpine AS build
+#   WORKDIR /app
+#   COPY package*.json ./
+#   RUN npm ci
+#   COPY . .
+#   ARG VITE_API_BASE_URL=/api/v1
+#   ARG VITE_STRIPE_PUBLISHABLE_KEY
+#   RUN npm run build
+#
+#   FROM nginx:alpine
+#   COPY --from=build /app/dist /usr/share/nginx/html
+#   COPY nginx-frontend.conf /etc/nginx/conf.d/default.conf
+#   EXPOSE 80
+#
+# Build: docker build -t ghcr.io/<org>/share-fair-frontend:latest \
+#          --build-arg VITE_STRIPE_PUBLISHABLE_KEY=pk_... ./share-fair-fe/
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: nginx-frontend-config
+  namespace: share-fair
+  labels:
+    app: frontend
+    app.kubernetes.io/part-of: share-fair
+data:
+  default.conf: |
+    server {
+        listen 80;
+        server_name _;
+        root /usr/share/nginx/html;
+        index index.html;
+
+        # Gzip static assets
+        gzip on;
+        gzip_types text/plain text/css application/json application/javascript text/xml application/xml;
+
+        # SPA: always serve index.html for unknown routes (React Router handles them)
+        location / {
+            try_files $uri $uri/ /index.html;
+        }
+
+        # Cache static assets aggressively (Vite adds content hashes)
+        location ~* \.(js|css|png|jpg|jpeg|gif|ico|svg|woff|woff2|ttf|eot)$ {
+            expires 1y;
+            add_header Cache-Control "public, immutable";
+        }
+
+        # No cache for index.html (ensure fresh app shell)
+        location = /index.html {
+            add_header Cache-Control "no-cache";
+        }
+    }
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: frontend
+  namespace: share-fair
+  labels:
+    app: frontend
+    app.kubernetes.io/part-of: share-fair
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: frontend
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  template:
+    metadata:
+      labels:
+        app: frontend
+        app.kubernetes.io/part-of: share-fair
+    spec:
+      containers:
+        - name: frontend
+          image: ghcr.io/your-org/share-fair-frontend:latest
+          imagePullPolicy: Always
+          ports:
+            - name: http
+              containerPort: 80
+          volumeMounts:
+            - name: nginx-frontend-config
+              mountPath: /etc/nginx/conf.d/default.conf
+              subPath: default.conf
+              readOnly: true
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 80
+            initialDelaySeconds: 10
+            periodSeconds: 15
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 80
+            initialDelaySeconds: 5
+            periodSeconds: 5
+          resources:
+            requests:
+              memory: "64Mi"
+              cpu: "50m"
+            limits:
+              memory: "128Mi"
+              cpu: "200m"
+      volumes:
+        - name: nginx-frontend-config
+          configMap:
+            name: nginx-frontend-config
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: frontend
+  namespace: share-fair
+  labels:
+    app: frontend
+    app.kubernetes.io/part-of: share-fair
+spec:
+  type: ClusterIP
+  selector:
+    app: frontend
+  ports:
+    - name: http
+      port: 80
+      targetPort: 80
