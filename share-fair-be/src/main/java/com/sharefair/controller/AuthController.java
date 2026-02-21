@@ -1,8 +1,10 @@
 package com.sharefair.controller;
 
 import com.sharefair.dto.*;
+import com.sharefair.entity.RefreshToken;
 import com.sharefair.entity.User;
 import com.sharefair.exception.InvalidTokenException;
+import com.sharefair.repository.RefreshTokenRepository;
 import com.sharefair.repository.UserRepository;
 import com.sharefair.security.JwtTokenProvider;
 import com.sharefair.security.UserPrincipal;
@@ -26,14 +28,19 @@ public class AuthController {
     private final OAuthService oAuthService;
     private final JwtTokenProvider tokenProvider;
     private final UserRepository userRepository;
+    private final RefreshTokenRepository refreshTokenRepository;
 
     @Value("${frontend.url:http://localhost:5173}")
     private String frontendUrl;
 
-    public AuthController(OAuthService oAuthService, JwtTokenProvider tokenProvider, UserRepository userRepository) {
+    public AuthController(OAuthService oAuthService,
+                          JwtTokenProvider tokenProvider,
+                          UserRepository userRepository,
+                          RefreshTokenRepository refreshTokenRepository) {
         this.oAuthService = oAuthService;
         this.tokenProvider = tokenProvider;
         this.userRepository = userRepository;
+        this.refreshTokenRepository = refreshTokenRepository;
     }
 
     @GetMapping("/oauth/{provider}")
@@ -60,26 +67,47 @@ public class AuthController {
                 redirectUri
         );
 
+        // Persist the issued refresh token so it can be rotated / revoked later
+        persistRefreshToken(authResponse.getUser().getId(), authResponse.getRefreshToken());
+
         return ResponseEntity.ok(ApiResponse.success(authResponse));
     }
 
     @PostMapping("/refresh")
     public ResponseEntity<ApiResponse<AuthResponse>> refreshToken(@RequestBody TokenRefreshRequest request) {
-        String refreshToken = request.getRefreshToken();
+        String incomingToken = request.getRefreshToken();
 
-        if (!tokenProvider.validateToken(refreshToken)) {
+        // 1. Validate JWT signature + expiry
+        if (!tokenProvider.validateToken(incomingToken)) {
             throw new InvalidTokenException("Invalid or expired refresh token");
         }
 
-        String userId = tokenProvider.getUserIdFromToken(refreshToken);
-        User user = userRepository.findById(userId)
+        // 2. Look up the token in the DB and ensure it hasn't been revoked
+        String tokenHash = tokenProvider.hashToken(incomingToken);
+        RefreshToken stored = refreshTokenRepository.findByTokenHash(tokenHash)
+                .orElseThrow(() -> new InvalidTokenException("Refresh token not recognised"));
+
+        if (Boolean.TRUE.equals(stored.getRevoked())) {
+            // Token reuse detected — revoke all tokens for this user
+            log.warn("Refresh token reuse detected for user {}. Revoking all sessions.", stored.getUserId());
+            refreshTokenRepository.revokeAllForUser(stored.getUserId());
+            throw new InvalidTokenException("Refresh token has already been used");
+        }
+
+        // 3. Look up the user
+        User user = userRepository.findById(stored.getUserId())
                 .orElseThrow(() -> new InvalidTokenException("User not found for refresh token"));
 
-        String newAccessToken = tokenProvider.generateAccessToken(user.getId(), user.getEmail());
+        // 4. Rotate: revoke old token, issue new refresh + new access token
+        refreshTokenRepository.revoke(tokenHash);
+
+        String newAccessToken  = tokenProvider.generateAccessToken(user.getId(), user.getEmail());
+        String newRefreshToken = tokenProvider.generateRefreshToken(user.getId());
+        persistRefreshToken(user.getId(), newRefreshToken);
 
         AuthResponse response = AuthResponse.builder()
                 .accessToken(newAccessToken)
-                .refreshToken(refreshToken)
+                .refreshToken(newRefreshToken)
                 .user(UserMapper.toDto(user))
                 .build();
 
@@ -101,10 +129,30 @@ public class AuthController {
     }
 
     @PostMapping("/logout")
-    public ResponseEntity<?> logout() {
+    public ResponseEntity<?> logout(@RequestBody(required = false) TokenRefreshRequest request,
+                                    @AuthenticationPrincipal UserPrincipal principal) {
+        // Revoke all refresh tokens for the user on logout
+        if (principal != null) {
+            refreshTokenRepository.revokeAllForUser(principal.getId());
+        } else if (request != null && request.getRefreshToken() != null) {
+            String hash = tokenProvider.hashToken(request.getRefreshToken());
+            refreshTokenRepository.findByTokenHash(hash)
+                    .ifPresent(t -> refreshTokenRepository.revokeAllForUser(t.getUserId()));
+        }
         return ResponseEntity.ok(ApiResponse.<String>builder()
                 .success(true)
                 .data("Logged out successfully")
                 .build());
+    }
+
+    // ── helpers ──────────────────────────────────────────────────────────────
+
+    private void persistRefreshToken(String userId, String rawToken) {
+        RefreshToken rt = RefreshToken.builder()
+                .userId(userId)
+                .tokenHash(tokenProvider.hashToken(rawToken))
+                .expiresAt(tokenProvider.getRefreshTokenExpiresAt())
+                .build();
+        refreshTokenRepository.save(rt);
     }
 }

@@ -1,5 +1,16 @@
 version: '3.8'
 
+# Profiles:
+#   (none)       — core stack only: postgres, minio, ollama, api, frontend, nginx
+#   monitoring   — adds Prometheus + Grafana
+#   logging      — adds Loki + Promtail
+#
+# Examples:
+#   docker compose up                                  # core only
+#   docker compose --profile monitoring up             # + Prometheus/Grafana
+#   docker compose --profile logging up                # + Loki/Promtail
+#   docker compose --profile monitoring --profile logging up  # everything
+
 services:
   postgres:
     build:
@@ -52,9 +63,11 @@ services:
     networks:
       - sharefair-network
 
+  # ── Logging profile ────────────────────────────────────────────────────────
   loki:
     image: grafana/loki:2.9.7
     container_name: sharefair-loki
+    profiles: [logging]
     ports:
       - "3100:3100"
     command: -config.file=/etc/loki/loki-config.yml
@@ -67,6 +80,7 @@ services:
   promtail:
     image: grafana/promtail:2.9.7
     container_name: sharefair-promtail
+    profiles: [logging]
     command: -config.file=/etc/promtail/promtail-config.yml
     volumes:
       - ./docker/promtail/promtail-config.yml:/etc/promtail/promtail-config.yml:ro
@@ -76,6 +90,7 @@ services:
     networks:
       - sharefair-network
 
+  # ── Core application ───────────────────────────────────────────────────────
   api:
     build:
       context: ./share-fair-be
@@ -135,15 +150,18 @@ services:
     volumes:
       - ./docker/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
       - ./docker/nginx/certs:/etc/nginx/certs:ro
+      - ./docker/nginx/error_pages:/etc/nginx/error_pages:ro
     depends_on:
       - api
       - frontend
     networks:
       - sharefair-network
 
+  # ── Monitoring profile ─────────────────────────────────────────────────────
   prometheus:
     image: prom/prometheus:latest
     container_name: sharefair-prometheus
+    profiles: [monitoring]
     ports:
       - "9090:9090"
     volumes:
@@ -157,6 +175,7 @@ services:
   grafana:
     image: grafana/grafana:latest
     container_name: sharefair-grafana
+    profiles: [monitoring]
     ports:
       - "3000:3000"
     environment:
@@ -168,7 +187,6 @@ services:
       - grafana_data:/var/lib/grafana
     depends_on:
       - prometheus
-      - loki
     networks:
       - sharefair-network
 

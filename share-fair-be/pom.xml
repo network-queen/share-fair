@@ -63,7 +63,7 @@
         <!-- Prometheus metrics via Micrometer -->
         <dependency>
             <groupId>io.micrometer</groupId>
-            <artifactId>micrometer-registry-</artifactId>
+            <artifactId>micrometer-registry-prometheus</artifactId>
         </dependency>
 
         <!-- Security -->

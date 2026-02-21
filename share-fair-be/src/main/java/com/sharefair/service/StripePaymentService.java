@@ -4,12 +4,14 @@ import com.sharefair.config.StripeConfig;
 import com.sharefair.dto.PaymentIntentResponse;
 import com.sharefair.entity.Transaction;
 import com.sharefair.exception.ResourceNotFoundException;
+import com.sharefair.repository.ListingRepository;
 import com.sharefair.repository.TransactionRepository;
 import org.springframework.security.access.AccessDeniedException;
 import com.stripe.exception.SignatureVerificationException;
 import com.stripe.exception.StripeException;
 import com.stripe.model.Event;
 import com.stripe.model.PaymentIntent;
+import com.stripe.net.RequestOptions;
 import com.stripe.net.Webhook;
 import com.stripe.param.PaymentIntentCreateParams;
 import org.slf4j.Logger;
@@ -23,10 +25,17 @@ public class StripePaymentService implements PaymentService {
 
     private final StripeConfig stripeConfig;
     private final TransactionRepository transactionRepository;
+    private final ListingRepository listingRepository;
+    private final NotificationService notificationService;
 
-    public StripePaymentService(StripeConfig stripeConfig, TransactionRepository transactionRepository) {
+    public StripePaymentService(StripeConfig stripeConfig,
+                                TransactionRepository transactionRepository,
+                                ListingRepository listingRepository,
+                                NotificationService notificationService) {
         this.stripeConfig = stripeConfig;
         this.transactionRepository = transactionRepository;
+        this.listingRepository = listingRepository;
+        this.notificationService = notificationService;
     }
 
     @Override
@@ -60,7 +69,12 @@ public class StripePaymentService implements PaymentService {
                     )
                     .build();
 
-            PaymentIntent intent = PaymentIntent.create(params);
+            // Idempotency key: scoped to this transaction so retries never create duplicate PaymentIntents
+            RequestOptions requestOptions = RequestOptions.builder()
+                    .setIdempotencyKey("pi-create-" + transactionId)
+                    .build();
+
+            PaymentIntent intent = PaymentIntent.create(params, requestOptions);
 
             transactionRepository.updatePaymentStatus(transactionId, "PROCESSING", intent.getId());
 
@@ -105,6 +119,13 @@ public class StripePaymentService implements PaymentService {
         log.info("Payment succeeded for transaction {}", transactionId);
         transactionRepository.updatePaymentStatus(transactionId, "PAID", intent.getId());
         transactionRepository.updateStatus(transactionId, "ACTIVE");
+
+        // Notify both borrower and owner that the transaction is now active
+        transactionRepository.findById(transactionId).ifPresent(tx -> {
+            String listingTitle = resolveListingTitle(tx.getListingId());
+            notificationService.notifyTransactionStatusChange(tx.getBorrowerId(), "ACTIVE", listingTitle, transactionId);
+            notificationService.notifyTransactionStatusChange(tx.getOwnerId(), "ACTIVE", listingTitle, transactionId);
+        });
     }
 
     private void handlePaymentFailed(Event event) {
@@ -117,5 +138,17 @@ public class StripePaymentService implements PaymentService {
 
         log.warn("Payment failed for transaction {}", transactionId);
         transactionRepository.updatePaymentStatus(transactionId, "FAILED", intent.getId());
+
+        // Notify borrower so they can retry or contact support
+        transactionRepository.findById(transactionId).ifPresent(tx -> {
+            String listingTitle = resolveListingTitle(tx.getListingId());
+            notificationService.notifyTransactionStatusChange(tx.getBorrowerId(), "PAYMENT_FAILED", listingTitle, transactionId);
+        });
+    }
+
+    private String resolveListingTitle(String listingId) {
+        return listingRepository.findById(listingId)
+                .map(l -> l.getTitle())
+                .orElse("the item");
     }
 }
