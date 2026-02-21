@@ -141,6 +141,57 @@ export interface ApiResponse<T> {
   message?: string;
 }
 
+// Messaging Types
+export interface Conversation {
+  id: string;
+  otherUserId: string;
+  otherUserName: string;
+  otherUserAvatar?: string;
+  transactionId?: string;
+  lastMessage?: string;
+  lastMessageAt?: string;
+  unreadCount: number;
+  createdAt: string;
+}
+
+export interface Message {
+  id: string;
+  conversationId: string;
+  senderId: string;
+  senderName: string;
+  content: string;
+  isRead: boolean;
+  createdAt: string;
+}
+
+// Insurance Types
+export type CoverageType = 'BASIC' | 'STANDARD' | 'PREMIUM';
+
+export interface InsurancePolicy {
+  id: string;
+  transactionId: string;
+  userId: string;
+  coverageType: CoverageType;
+  premiumAmount: number;
+  maxCoverage: number;
+  status: 'ACTIVE' | 'EXPIRED' | 'CLAIMED';
+  createdAt: string;
+  expiresAt: string;
+}
+
+export interface InsuranceClaim {
+  id: string;
+  policyId: string;
+  claimantId: string;
+  claimantName: string;
+  description: string;
+  claimAmount: number;
+  status: 'SUBMITTED' | 'UNDER_REVIEW' | 'APPROVED' | 'REJECTED' | 'PAID';
+  resolutionNotes?: string;
+  createdAt: string;
+  resolvedAt?: string;
+}
+
 // Pagination
 export interface PaginatedResponse<T> {
   content: T[];

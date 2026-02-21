@@ -62,6 +62,8 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/api/v1/recommendations/similar/**").permitAll()
                         .requestMatchers("/api/v1/recommendations/**").authenticated()
                         .requestMatchers("/ws/**").permitAll()
+                        .requestMatchers("/api/v1/messages/**").authenticated()
+                        .requestMatchers("/api/v1/insurance/**").authenticated()
                         .requestMatchers(HttpMethod.PATCH, "/api/v1/listings/**").authenticated()
                         .requestMatchers("/actuator/health").permitAll()
                         .requestMatchers("/actuator/prometheus").permitAll()

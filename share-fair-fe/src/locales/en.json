@@ -337,5 +337,47 @@
     "forYou": "Recommended for You",
     "similar": "Similar Listings",
     "basedOnHistory": "Based on your rental history"
+  },
+  "messages": {
+    "title": "Messages",
+    "conversations": "Conversations",
+    "noConversations": "No conversations yet",
+    "noMessages": "No messages yet. Say hello!",
+    "send": "Send",
+    "inputPlaceholder": "Type a message...",
+    "selectConversation": "Select a conversation to start chatting",
+    "messageOtherParty": "Message the other party"
+  },
+  "insurance": {
+    "title": "Rental Insurance",
+    "addInsurance": "Add Insurance",
+    "selectCoverage": "Select a coverage plan",
+    "confirm": "Confirm Insurance",
+    "premium": "Premium",
+    "maxCoverage": "Max coverage",
+    "covers": "Covers up to",
+    "fileClaim": "File a Claim",
+    "submitClaim": "Submit Claim",
+    "claim": "Claim",
+    "notAvailable": "No insurance policy for this transaction",
+    "claimDescriptionPlaceholder": "Describe the damage or issue in detail...",
+    "claimAmountPlaceholder": "Claim amount ($)",
+    "coverage": {
+      "BASIC": "Basic",
+      "STANDARD": "Standard",
+      "PREMIUM": "Premium"
+    },
+    "status": {
+      "ACTIVE": "Active",
+      "EXPIRED": "Expired",
+      "CLAIMED": "Claimed"
+    },
+    "claimStatus": {
+      "SUBMITTED": "Submitted",
+      "UNDER_REVIEW": "Under Review",
+      "APPROVED": "Approved",
+      "REJECTED": "Rejected",
+      "PAID": "Paid"
+    }
   }
 }

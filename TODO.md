@@ -92,14 +92,14 @@ _(none)_
 - [x] HTTPS configuration (Nginx reverse proxy with TLS termination, self-signed certs for dev, HTTP→HTTPS redirect, WebSocket support for HMR)
 
 ### Future / Post-MVP
-- [ ] User messaging / chat system
+- [x] User messaging / chat system
 - [x] Real-time notifications (WebSockets)
 - [ ] Elasticsearch for advanced search
 - [x] Mobile apps (React Native)
 - [x] AI-powered recommendations
 - [x] Sustainability reports
 - [x] Dispute resolution system
-- [ ] Insurance integration
+- [x] Insurance integration
 - [ ] Additional languages (German, Polish)
 - [ ] RTL language support
 - [ ] GraphQL gateway

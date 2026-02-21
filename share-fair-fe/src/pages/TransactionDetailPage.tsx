@@ -10,7 +10,10 @@ import DisputeForm from '../components/DisputeForm'
 import SEO from '../components/SEO'
 import reviewService from '../services/reviewService'
 import disputeService, { type DisputeResponse } from '../services/disputeService'
+import insuranceService from '../services/insuranceService'
+import messageService from '../services/messageService'
 import type { ReviewResponse } from '../services/reviewService'
+import type { InsurancePolicy, InsuranceClaim, CoverageType } from '../types'
 import { getStatusColor } from '../utils/transactionUtils'
 
 const TransactionDetailPage = () => {
@@ -27,6 +30,15 @@ const TransactionDetailPage = () => {
   const [reviewChecked, setReviewChecked] = useState(false)
   const [showDisputeForm, setShowDisputeForm] = useState(false)
   const [existingDispute, setExistingDispute] = useState<DisputeResponse | null>(null)
+  const [insurancePolicy, setInsurancePolicy] = useState<InsurancePolicy | null>(null)
+  const [insuranceClaims, setInsuranceClaims] = useState<InsuranceClaim[]>([])
+  const [showInsuranceSelector, setShowInsuranceSelector] = useState(false)
+  const [showClaimForm, setShowClaimForm] = useState(false)
+  const [claimDescription, setClaimDescription] = useState('')
+  const [claimAmount, setClaimAmount] = useState('')
+  const [selectedCoverage, setSelectedCoverage] = useState<CoverageType>('BASIC')
+  const [addingInsurance, setAddingInsurance] = useState(false)
+  const [filingClaim, setFilingClaim] = useState(false)
 
   useEffect(() => {
     if (id) {
@@ -46,7 +58,59 @@ const TransactionDetailPage = () => {
     if (currentTransaction?.status === 'DISPUTED' && id) {
       disputeService.getDisputeByTransaction(id).then(setExistingDispute)
     }
+    if (id && (currentTransaction?.status === 'PENDING' || currentTransaction?.status === 'ACTIVE' || currentTransaction?.status === 'COMPLETED')) {
+      insuranceService.getPolicyForTransaction(id)
+        .then((policy) => {
+          setInsurancePolicy(policy)
+          if (policy) {
+            insuranceService.getClaims(policy.id).then(setInsuranceClaims).catch(() => {})
+          }
+        })
+        .catch(() => {})
+    }
   }, [currentTransaction?.status, id])
+
+  const handleAddInsurance = async () => {
+    if (!id) return
+    setAddingInsurance(true)
+    try {
+      const policy = await insuranceService.addInsurance(id, selectedCoverage)
+      setInsurancePolicy(policy)
+      setShowInsuranceSelector(false)
+    } catch {
+      // ignore
+    } finally {
+      setAddingInsurance(false)
+    }
+  }
+
+  const handleFileClaim = async () => {
+    if (!insurancePolicy || !claimDescription || !claimAmount) return
+    setFilingClaim(true)
+    try {
+      const claim = await insuranceService.fileClaim(insurancePolicy.id, claimDescription, parseFloat(claimAmount))
+      setInsuranceClaims((prev) => [claim, ...prev])
+      setInsurancePolicy((p) => p ? { ...p, status: 'CLAIMED' } : p)
+      setShowClaimForm(false)
+      setClaimDescription('')
+      setClaimAmount('')
+    } catch {
+      // ignore
+    } finally {
+      setFilingClaim(false)
+    }
+  }
+
+  const handleOpenChat = async () => {
+    if (!currentTransaction) return
+    const otherUserId = user?.id === currentTransaction.ownerId ? currentTransaction.borrowerId : currentTransaction.ownerId
+    try {
+      await messageService.startConversation(otherUserId, id)
+      window.location.href = '/messages'
+    } catch {
+      // ignore
+    }
+  }
 
   const handleStatusUpdate = async (newStatus: string) => {
     if (!id) return
@@ -191,6 +255,150 @@ const TransactionDetailPage = () => {
               }}
               onError={(msg) => setPaymentError(msg)}
             />
+          </div>
+        )}
+
+        {/* Insurance Section */}
+        {!tx.isFree && (tx.status === 'PENDING' || tx.status === 'ACTIVE' || tx.status === 'COMPLETED') && (
+          <div className="border-t dark:border-gray-700 pt-6 space-y-4">
+            <h3 className="font-semibold">{t('insurance.title')}</h3>
+
+            {insurancePolicy ? (
+              <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-700 rounded-lg p-4 space-y-2">
+                <div className="flex items-center justify-between">
+                  <span className="font-medium text-blue-800 dark:text-blue-300">
+                    {t(`insurance.coverage.${insurancePolicy.coverageType}`)}
+                  </span>
+                  <span className={`text-xs px-2 py-1 rounded-full font-medium ${
+                    insurancePolicy.status === 'ACTIVE' ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' :
+                    insurancePolicy.status === 'CLAIMED' ? 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400' :
+                    'bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-400'
+                  }`}>
+                    {t(`insurance.status.${insurancePolicy.status}`)}
+                  </span>
+                </div>
+                <p className="text-sm text-gray-600 dark:text-gray-300">
+                  {t('insurance.premium')}: <strong>${insurancePolicy.premiumAmount}</strong> &bull;{' '}
+                  {t('insurance.maxCoverage')}: <strong>${insurancePolicy.maxCoverage}</strong>
+                </p>
+                {insuranceClaims.length > 0 && (
+                  <div className="mt-2 space-y-1">
+                    {insuranceClaims.map((claim) => (
+                      <div key={claim.id} className="text-sm bg-white dark:bg-gray-800 rounded p-2">
+                        <span className="font-medium">{t('insurance.claim')}: ${claim.claimAmount}</span>
+                        {' — '}
+                        <span className="text-gray-500">{t(`insurance.claimStatus.${claim.status}`)}</span>
+                      </div>
+                    ))}
+                  </div>
+                )}
+                {insurancePolicy.status === 'ACTIVE' && isBorrower && !showClaimForm && (
+                  <button
+                    onClick={() => setShowClaimForm(true)}
+                    className="text-sm text-blue-600 dark:text-blue-400 hover:underline mt-1"
+                  >
+                    {t('insurance.fileClaim')}
+                  </button>
+                )}
+                {showClaimForm && (
+                  <div className="space-y-3 pt-2">
+                    <textarea
+                      value={claimDescription}
+                      onChange={(e) => setClaimDescription(e.target.value)}
+                      placeholder={t('insurance.claimDescriptionPlaceholder')}
+                      rows={3}
+                      className="w-full px-3 py-2 border dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-sm"
+                    />
+                    <input
+                      type="number"
+                      value={claimAmount}
+                      onChange={(e) => setClaimAmount(e.target.value)}
+                      placeholder={t('insurance.claimAmountPlaceholder')}
+                      min="0"
+                      max={insurancePolicy.maxCoverage}
+                      className="w-full px-3 py-2 border dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-sm"
+                    />
+                    <div className="flex gap-2">
+                      <button
+                        onClick={handleFileClaim}
+                        disabled={filingClaim || !claimDescription || !claimAmount}
+                        className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 disabled:opacity-50"
+                      >
+                        {filingClaim ? t('common.loading') : t('insurance.submitClaim')}
+                      </button>
+                      <button onClick={() => setShowClaimForm(false)} className="px-4 py-2 bg-gray-200 dark:bg-gray-700 rounded-lg text-sm">
+                        {t('common.cancel')}
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
+            ) : isBorrower && (tx.status === 'PENDING' || tx.status === 'ACTIVE') ? (
+              <>
+                {!showInsuranceSelector ? (
+                  <button
+                    onClick={() => setShowInsuranceSelector(true)}
+                    className="text-sm px-4 py-2 border border-blue-500 text-blue-600 dark:text-blue-400 rounded-lg hover:bg-blue-50 dark:hover:bg-blue-900/20"
+                  >
+                    {t('insurance.addInsurance')}
+                  </button>
+                ) : (
+                  <div className="border dark:border-gray-700 rounded-lg p-4 space-y-3">
+                    <p className="text-sm font-medium">{t('insurance.selectCoverage')}</p>
+                    <div className="grid grid-cols-3 gap-3">
+                      {(['BASIC', 'STANDARD', 'PREMIUM'] as CoverageType[]).map((type) => (
+                        <button
+                          key={type}
+                          onClick={() => setSelectedCoverage(type)}
+                          className={`p-3 rounded-lg border text-center text-sm ${
+                            selectedCoverage === type
+                              ? 'border-primary bg-primary/10 text-primary font-semibold'
+                              : 'border-gray-200 dark:border-gray-600 hover:border-primary/50'
+                          }`}
+                        >
+                          <div className="font-medium">{t(`insurance.coverage.${type}`)}</div>
+                          <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                            ${insuranceService.calculatePremium(tx.totalAmount, type)}
+                          </div>
+                          <div className="text-xs text-gray-400 dark:text-gray-500">
+                            {t('insurance.covers')} ${insuranceService.getMaxCoverage(tx.totalAmount, type)}
+                          </div>
+                        </button>
+                      ))}
+                    </div>
+                    <div className="flex gap-2">
+                      <button
+                        onClick={handleAddInsurance}
+                        disabled={addingInsurance}
+                        className="px-4 py-2 bg-primary text-white rounded-lg text-sm font-semibold hover:bg-primary/90 disabled:opacity-50"
+                      >
+                        {addingInsurance ? t('common.loading') : t('insurance.confirm')}
+                      </button>
+                      <button onClick={() => setShowInsuranceSelector(false)} className="px-4 py-2 bg-gray-200 dark:bg-gray-700 rounded-lg text-sm">
+                        {t('common.cancel')}
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </>
+            ) : (
+              <p className="text-sm text-gray-500 dark:text-gray-400">{t('insurance.notAvailable')}</p>
+            )}
+          </div>
+        )}
+
+        {/* Message Other Party */}
+        {(tx.status === 'PENDING' || tx.status === 'ACTIVE') && (
+          <div className="border-t dark:border-gray-700 pt-4">
+            <button
+              onClick={handleOpenChat}
+              className="text-sm text-primary hover:underline flex items-center gap-1"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+              </svg>
+              {t('messages.messageOtherParty')}
+            </button>
           </div>
         )}
 

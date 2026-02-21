@@ -337,5 +337,47 @@
     "forYou": "Рекомендовано для вас",
     "similar": "Схожі оголошення",
     "basedOnHistory": "На основі вашої історії оренди"
+  },
+  "messages": {
+    "title": "Повідомлення",
+    "conversations": "Розмови",
+    "noConversations": "Розмов ще немає",
+    "noMessages": "Повідомлень ще немає. Привітайтесь!",
+    "send": "Надіслати",
+    "inputPlaceholder": "Введіть повідомлення...",
+    "selectConversation": "Оберіть розмову для чату",
+    "messageOtherParty": "Написати іншій стороні"
+  },
+  "insurance": {
+    "title": "Страхування оренди",
+    "addInsurance": "Додати страховку",
+    "selectCoverage": "Оберіть план страхування",
+    "confirm": "Підтвердити страховку",
+    "premium": "Внесок",
+    "maxCoverage": "Макс. покриття",
+    "covers": "Покриває до",
+    "fileClaim": "Подати заяву",
+    "submitClaim": "Надіслати заяву",
+    "claim": "Заява",
+    "notAvailable": "Для цієї операції немає страхового поліса",
+    "claimDescriptionPlaceholder": "Опишіть пошкодження або проблему детально...",
+    "claimAmountPlaceholder": "Сума заяви ($)",
+    "coverage": {
+      "BASIC": "Базова",
+      "STANDARD": "Стандартна",
+      "PREMIUM": "Преміум"
+    },
+    "status": {
+      "ACTIVE": "Активна",
+      "EXPIRED": "Закінчилась",
+      "CLAIMED": "Подана заява"
+    },
+    "claimStatus": {
+      "SUBMITTED": "Подано",
+      "UNDER_REVIEW": "На розгляді",
+      "APPROVED": "Схвалено",
+      "REJECTED": "Відхилено",
+      "PAID": "Виплачено"
+    }
   }
 }

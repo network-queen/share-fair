@@ -157,6 +157,36 @@ public class NotificationService {
         }
     }
 
+    public void notifyInsurancePurchased(String userId, String coverageType, String transactionId) {
+        NotificationPreference pref = getPreferences(userId);
+        if (pref.getInAppTransactions()) {
+            Notification notification = Notification.builder()
+                    .userId(userId)
+                    .type("INSURANCE_PURCHASED")
+                    .title("Insurance policy activated")
+                    .message(coverageType + " coverage is now active for your transaction.")
+                    .referenceId(transactionId)
+                    .referenceType("TRANSACTION")
+                    .build();
+            saveAndPush(notification);
+        }
+    }
+
+    public void notifyInsuranceClaimFiled(String userId, String policyId, String transactionId) {
+        NotificationPreference pref = getPreferences(userId);
+        if (pref.getInAppTransactions()) {
+            Notification notification = Notification.builder()
+                    .userId(userId)
+                    .type("INSURANCE_CLAIM")
+                    .title("Insurance claim submitted")
+                    .message("Your insurance claim has been submitted and is under review.")
+                    .referenceId(transactionId)
+                    .referenceType("TRANSACTION")
+                    .build();
+            saveAndPush(notification);
+        }
+    }
+
     public void sendWelcomeEmail(String userId) {
         User user = userRepository.findById(userId).orElse(null);
         if (user != null && user.getEmail() != null) {

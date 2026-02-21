@@ -19,6 +19,7 @@ import TransactionDetailPage from './pages/TransactionDetailPage'
 import PaymentReturnPage from './pages/PaymentReturnPage'
 import EditListingPage from './pages/EditListingPage'
 import SustainabilityPage from './pages/SustainabilityPage'
+import MessagesPage from './pages/MessagesPage'
 import NotFoundPage from './pages/NotFoundPage'
 
 // Components - Will be created in next iteration
@@ -88,6 +89,15 @@ function App() {
             element={
               <ProtectedRoute isAuthenticated={isAuthenticated}>
                 <TransactionDetailPage />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/messages"
+            element={
+              <ProtectedRoute isAuthenticated={isAuthenticated}>
+                <MessagesPage />
               </ProtectedRoute>
             }
           />

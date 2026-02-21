@@ -30,6 +30,9 @@ const Navigation = () => {
           <Link to="/transactions" className="text-gray-700 dark:text-gray-200 hover:text-primary" onClick={() => setMobileMenuOpen(false)}>
             {t('transaction.myTransactions')}
           </Link>
+          <Link to="/messages" className="text-gray-700 dark:text-gray-200 hover:text-primary" onClick={() => setMobileMenuOpen(false)}>
+            {t('messages.title')}
+          </Link>
           <Link to="/profile" className="text-gray-700 dark:text-gray-200 hover:text-primary" onClick={() => setMobileMenuOpen(false)}>
             {t('common.profile')}
           </Link>
